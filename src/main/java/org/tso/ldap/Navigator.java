@@ -1,7 +1,5 @@
 package org.tso.ldap;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.gnome.gio.ApplicationFlags;
@@ -13,12 +11,14 @@ import org.gnome.gtk.GtkBuilder;
 
 import org.gnome.gtk.Window;
 
+import org.tso.ldap.util.GuiUtils;
+
 public class Navigator {
 
     private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
 
     Window mainWindow;
-    Window openDialog;
+    Connection connection;
 
     ArrayList<Object> asHex(byte[] buf) {
 
@@ -54,27 +54,11 @@ public class Navigator {
 
     }
 
-    String getDefintion(String defintion) throws Exception {
-        InputStream inputStream = Navigator.class.
-                getResourceAsStream("/org/tso/ldap/navigator.ui");
-
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-        byte[] buffer = new byte[1024];
-
-        for (int length; (length = inputStream.read(buffer)) != -1;) {
-            output.write(buffer, 0, length);
-        }
-
-        return output.toString("UTF-8");
-
-    }
-
     public void activate(Application app) {
         GtkBuilder builder = new GtkBuilder();
 
         try {
-            var uiDefinition = getDefintion("/org/tso/ldap/navigator.ui");
+            var uiDefinition = GuiUtils.getDefintion("/org/tso/ldap/navigator.ui");
 
             builder.addFromString(uiDefinition, uiDefinition.length());
 
@@ -83,6 +67,8 @@ public class Navigator {
             var openToolbarButton = (Button) builder.getObject("openToolbarButton");
 
             openToolbarButton.onClicked(this::open);
+
+            connection = new Connection("/org/tso/ldap/open-dialog.ui");
 
             mainWindow.setApplication(app);
 
@@ -107,4 +93,5 @@ public class Navigator {
     public static void main(String[] args) {
         new Navigator(args);
     }
+    
 }

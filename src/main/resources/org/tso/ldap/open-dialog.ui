@@ -3,7 +3,7 @@
   <object class="GtkWindow" id="openDialog">
     <property name="default-width">600</property>
     <property name="default-height">400</property>
-    <property name="visible">true</property>
+    <property name="visible">false</property>
     <property name="resizable">false</property>
     <property name="modal">true</property>
     <property name="title" translatable="1">Open LDAP Connection</property>
