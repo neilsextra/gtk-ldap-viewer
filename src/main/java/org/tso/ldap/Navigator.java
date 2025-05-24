@@ -1,34 +1,25 @@
 package org.tso.ldap;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.gnome.gio.ApplicationFlags;
-import org.gnome.gio.File;
-import org.gnome.gio.ListStore;
-import org.gnome.glib.Type;
-import org.gnome.gobject.GObject;
 
 import org.gnome.gtk.Application;
 import org.gnome.gtk.Button;
 
 import org.gnome.gtk.GtkBuilder;
-import org.gnome.gtk.Inscription;
-import org.gnome.gtk.ListItem;
-import org.gnome.gtk.NoSelection;
-import org.gnome.gtk.SignalListItemFactory;
-import org.gnome.gtk.Window;
 
-import io.github.jwharm.javagi.gobject.types.Types;
+import org.gnome.gtk.Window;
 
 public class Navigator {
 
     private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
 
-    Window window;
- 
+    Window mainWindow;
+    Window openDialog;
+
     ArrayList<Object> asHex(byte[] buf) {
 
         var values = new ArrayList<Object>(2);
@@ -37,7 +28,7 @@ public class Navigator {
 
         String[] hex = new String[16];
 
-        for (int iHex = 0; iHex <hex.length; iHex++) {
+        for (int iHex = 0; iHex < hex.length; iHex++) {
             hex[iHex] = "";
         }
 
@@ -60,37 +51,42 @@ public class Navigator {
     }
 
     void open() {
- 
+
+    }
+
+    String getDefintion(String defintion) throws Exception {
+        InputStream inputStream = Navigator.class.
+                getResourceAsStream("/org/tso/ldap/navigator.ui");
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+
+        for (int length; (length = inputStream.read(buffer)) != -1;) {
+            output.write(buffer, 0, length);
+        }
+
+        return output.toString("UTF-8");
+
     }
 
     public void activate(Application app) {
         GtkBuilder builder = new GtkBuilder();
 
         try {
-            InputStream inputStream = Navigator.class.
-                    getResourceAsStream("/org/tso/ldap/navigator.ui");
-
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-            byte[] buffer = new byte[1024];
-
-            for (int length; (length = inputStream.read(buffer)) != -1;) {
-                output.write(buffer, 0, length);
-            }
-
-            var uiDefinition = output.toString("UTF-8");
+            var uiDefinition = getDefintion("/org/tso/ldap/navigator.ui");
 
             builder.addFromString(uiDefinition, uiDefinition.length());
 
-            window = (Window) builder.getObject("main");
+            mainWindow = (Window) builder.getObject("main");
 
             var openToolbarButton = (Button) builder.getObject("openToolbarButton");
 
             openToolbarButton.onClicked(this::open);
-            
-            window.setApplication(app);
 
-            window.setVisible(true);
+            mainWindow.setApplication(app);
+
+            mainWindow.setVisible(true);
 
         } catch (Exception e) {
 
@@ -105,6 +101,7 @@ public class Navigator {
 
         app.onActivate(() -> activate(app));
         app.run(args);
+
     }
 
     public static void main(String[] args) {

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkWindow" id="openDialog">
+    <property name="default-width">600</property>
+    <property name="default-height">400</property>
+    <property name="visible">true</property>
+    <property name="resizable">false</property>
+    <property name="modal">true</property>
+    <property name="title" translatable="1">Open LDAP Connection</property>
+
+    <child type="action">
+      <object class="GtkButton" id="button_cancel" />
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="button_ok">
+      </object>
+    </child>
+  </object>
+</interface>
