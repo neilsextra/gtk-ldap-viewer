@@ -3,6 +3,7 @@ package org.tso.ldap;
 import java.util.ArrayList;
 
 import org.gnome.gio.ApplicationFlags;
+import org.gnome.gio.ListStore;
 import org.gnome.glib.Type;
 import org.gnome.gobject.GObject;
 import org.gnome.gtk.Application;
@@ -12,9 +13,10 @@ import org.gnome.gtk.ColumnViewColumn;
 import org.gnome.gtk.GtkBuilder;
 import org.gnome.gtk.Inscription;
 import org.gnome.gtk.ListItem;
+import org.gnome.gtk.NoSelection;
 import org.gnome.gtk.SignalListItemFactory;
 import org.gnome.gtk.Window;
-
+import org.tso.ldap.Navigator.Row;
 import org.tso.ldap.util.GuiUtils;
 
 import io.github.jwharm.javagi.gobject.types.Types;
@@ -24,6 +26,8 @@ public class Navigator {
     
     Window mainWindow;
     Connection connection;
+    ListStore<Row> store;
+    ColumnView columnView;
 
     public static final class Row extends GObject {
 
@@ -67,38 +71,91 @@ public class Navigator {
     }
 
     void setupColumns(ColumnView columnview) {
-        var columnFactory = new SignalListItemFactory();
+        var columnFactoryName = GuiUtils.createSignalListItemFactory();
 
-        columnFactory.onSetup(item -> {
+        columnFactoryName.onBind(item -> {
             var listitem = (ListItem) item;
-            var inscription = Inscription.builder()
-                    .setXalign(0)
-                    .build();
-            listitem.setChild(inscription);
+            var inscription = (Inscription) listitem.getChild();
+            var row = (Row) listitem.getItem();
+            inscription.setText(row.getName());
 
         });
 
-        columnFactory.onBind(item -> {
+        var columnFactoryOid =  GuiUtils.createSignalListItemFactory();
+
+        columnFactoryOid.onBind(item -> {
             var listitem = (ListItem) item;
             var inscription = (Inscription) listitem.getChild();
 
-            if (inscription != null) {
-                var row = (Row) listitem.getItem();
-                inscription.setText(row.getName());
-            }
+            var row = (Row) listitem.getItem();
+            inscription.setText(row.getOid());
+
         });
 
-        var column = new ColumnViewColumn("", columnFactory);
-        column.setExpand(true);
+        var columnFactorySyntax =  GuiUtils.createSignalListItemFactory();
 
-        columnview.appendColumn(column);
+        columnFactorySyntax.onBind(item -> {
+            var listitem = (ListItem) item;
+            var inscription = (Inscription) listitem.getChild();
+
+            var row = (Row) listitem.getItem();
+            inscription.setText(row.getSyntax());
+
+        });
+
+        var columnFactorType = GuiUtils.createSignalListItemFactory();
+
+        columnFactorType.onBind(item -> {
+            var listitem = (ListItem) item;
+            var inscription = (Inscription) listitem.getChild();
+            var row = (Row) listitem.getItem();
+            inscription.setText(row.getPrimitiveType());
+
+        });
+
+        var columnFactorValue =  GuiUtils.createSignalListItemFactory();
+
+        columnFactorValue.onBind(item -> {
+            var listitem = (ListItem) item;
+            var inscription = (Inscription) listitem.getChild();
+            var row = (Row) listitem.getItem();
+            inscription.setText(row.getPrimitiveType());
+
+        });
+
+        var columnName = new ColumnViewColumn("Name", columnFactoryName);
+        var columnOid = new ColumnViewColumn("OID", columnFactoryOid);
+        var columnSyntax = new ColumnViewColumn("Syntax", columnFactorySyntax);
+        var columnType = new ColumnViewColumn("Type", columnFactorType);
+        var columnValue = new ColumnViewColumn("Value", columnFactorType);
+
+        columnName.setFixedWidth(250);
+        columnName.setResizable(true);
+
+        columnOid.setFixedWidth(150);
+        columnOid.setResizable(true);
+        
+        columnSyntax.setFixedWidth(150);
+        columnSyntax.setResizable(true);
+        
+        columnType.setFixedWidth(50);
+        columnType.setResizable(true);
+
+        columnValue.setExpand(true);
+        columnValue.setResizable(true);
+ 
+        columnview.appendColumn(columnName);
+        columnview.appendColumn(columnOid);
+        columnview.appendColumn(columnSyntax);
+        columnview.appendColumn(columnType);
+        columnview.appendColumn(columnValue);
 
     }
 
     void open() {
 
         connection.show();
-        
+
     }
 
     public void activate(Application app) {
@@ -116,6 +173,16 @@ public class Navigator {
             openToolbarButton.onClicked(this::open);
 
             connection = new Connection("/org/tso/ldap/open-dialog.ui");
+
+            columnView = (ColumnView) builder.getObject("attributesViewer");
+
+            columnView.setShowColumnSeparators(true);
+
+            store = new ListStore<>(Row.gtype);
+
+            setupColumns(columnView);
+
+            columnView.setModel(new NoSelection<Row>(store));
 
             mainWindow.setApplication(app);
 

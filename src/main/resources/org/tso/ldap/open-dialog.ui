@@ -6,6 +6,7 @@
     <property name="visible">false</property>
     <property name="resizable">false</property>
     <property name="modal">true</property>
+    <property name="hide_on_close">true</property>
     <property name="title" translatable="1">Open LDAP Connection</property>
     <child>
       <object class="GtkGrid">

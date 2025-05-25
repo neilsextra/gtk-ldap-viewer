@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.gnome.gtk.Inscription;
+import org.gnome.gtk.ListItem;
+import org.gnome.gtk.SignalListItemFactory;
 import org.tso.ldap.Navigator;
 
 public class GuiUtils {
@@ -55,5 +58,21 @@ public class GuiUtils {
         return values;
     }
 
+     static final public SignalListItemFactory createSignalListItemFactory() {
+
+        var columnFactory = new SignalListItemFactory();
+
+        columnFactory.onSetup(item -> {
+            var listitem = (ListItem) item;
+            var inscription = Inscription.builder()
+                    .setXalign(0)
+                    .build();
+            listitem.setChild(inscription);
+
+        });
+
+        return columnFactory;
+
+    }
 
 }
