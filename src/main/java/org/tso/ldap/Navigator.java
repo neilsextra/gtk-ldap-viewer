@@ -21,7 +21,7 @@ public class Navigator {
 
     
     Window mainWindow;
-    Connection connection;
+    ConnectionDialog connection;
     ListStore<Row> store;
     ColumnView columnView;
 
@@ -168,7 +168,7 @@ public class Navigator {
 
             openToolbarButton.onClicked(this::open);
 
-            connection = new Connection("/org/tso/ldap/open-dialog.ui");
+            connection = new ConnectionDialog("/org/tso/ldap/open-dialog.ui");
 
             columnView = (ColumnView) builder.getObject("attributesViewer");
 

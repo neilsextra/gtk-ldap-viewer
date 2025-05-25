@@ -1,0 +1,62 @@
+package org.tso.ldap;
+
+import org.gnome.gtk.GtkBuilder;
+import org.gnome.gtk.Window;
+import org.gnome.gtk.AlertDialog;
+import org.gnome.gtk.Button;
+import org.gnome.gtk.Entry;
+import org.gnome.gtk.EntryBuffer;
+
+import org.tso.ldap.util.GuiUtils;
+
+public class ConnectionDialog {
+    Window window;
+    GtkBuilder builder;
+    Connection connection = null;
+
+    ConnectionDialog(String definition) throws Exception {
+        builder = new GtkBuilder();
+
+        var uiDefinition = GuiUtils.getDefintion(definition);
+
+        builder.addFromString(uiDefinition, uiDefinition.length());
+
+        this.window = (Window) builder.getObject("openDialog");
+
+        final var okButton = (Button) builder.getObject("button_ok");
+        final var connectionUrl = (Entry) builder.getObject("connection");
+
+        okButton.onClicked(() -> {
+            EntryBuffer buffer = connectionUrl.getBuffer();
+
+            try {
+                ConnectionDialog.this.connection = new Connection(buffer.getText());
+
+                ConnectionDialog.this.connection.connect();
+
+                window.close();
+
+            } catch (Exception e) {
+               AlertDialog.builder()
+                        .setModal(true)
+                        .setMessage("Connection Error")
+                        .setDetail(e.getMessage())
+                        .build()
+                        .show(ConnectionDialog.this.window); 
+            }
+        
+        });
+
+        var closeButton = (Button) builder.getObject("button_cancel");
+
+        closeButton.onClicked(window::close);
+
+    }
+
+    void show() {
+
+        this.window.setVisible(true);
+
+    }
+
+}
