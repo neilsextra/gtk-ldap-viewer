@@ -111,6 +111,7 @@
                     <property name="max_content_height">200</property>
                     <child>
                       <object class="GtkTextView" id="attributeViewer">
+                        <property name="editable">false</property>
                       </object>
                     </child>
                   </object>
