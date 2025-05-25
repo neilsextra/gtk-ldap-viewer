@@ -1,7 +1,5 @@
 package org.tso.ldap;
 
-import java.util.ArrayList;
-
 import org.gnome.gio.ApplicationFlags;
 import org.gnome.gio.ListStore;
 import org.gnome.glib.Type;
@@ -14,9 +12,7 @@ import org.gnome.gtk.GtkBuilder;
 import org.gnome.gtk.Inscription;
 import org.gnome.gtk.ListItem;
 import org.gnome.gtk.NoSelection;
-import org.gnome.gtk.SignalListItemFactory;
 import org.gnome.gtk.Window;
-import org.tso.ldap.Navigator.Row;
 import org.tso.ldap.util.GuiUtils;
 
 import io.github.jwharm.javagi.gobject.types.Types;
