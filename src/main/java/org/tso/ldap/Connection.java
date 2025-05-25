@@ -16,7 +16,13 @@ public class Connection {
 
         builder.addFromString(uiDefinition, uiDefinition.length());
 
-        window = (Window) builder.getObject("main");
+        this.window = (Window) builder.getObject("openDialog");
+    }
+
+    void show() {
+
+        this.window.setVisible(true);
+
     }
 
 }

@@ -2,11 +2,13 @@ package org.tso.ldap.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import org.tso.ldap.Navigator;
 
 public class GuiUtils {
-    
+    private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
+
     static final public String getDefintion(String definition) throws Exception {
         InputStream inputStream = Navigator.class.
                 getResourceAsStream(definition);
@@ -22,5 +24,36 @@ public class GuiUtils {
         return output.toString("UTF-8");
 
     }
+
+    static final public ArrayList<Object> asHex(byte[] buf) {
+
+        var values = new ArrayList<Object>(2);
+
+        StringBuffer asciiChars = new StringBuffer();
+
+        String[] hex = new String[16];
+
+        for (int iHex = 0; iHex < hex.length; iHex++) {
+            hex[iHex] = "";
+        }
+
+        for (int i = 0, c = 0; i < buf.length; i++, c++) {
+            char[] chars = new char[2];
+
+            chars[0] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
+            chars[1] = HEX_CHARS[buf[i] & 0x0F];
+
+            hex[c] = new String(chars);
+
+            asciiChars.append(Character.isLetterOrDigit(buf[i]) ? (char) buf[i] : '.');
+
+        }
+
+        values.add(hex);
+        values.add(asciiChars);
+
+        return values;
+    }
+
 
 }

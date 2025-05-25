@@ -3,55 +3,102 @@ package org.tso.ldap;
 import java.util.ArrayList;
 
 import org.gnome.gio.ApplicationFlags;
-
+import org.gnome.glib.Type;
+import org.gnome.gobject.GObject;
 import org.gnome.gtk.Application;
 import org.gnome.gtk.Button;
-
+import org.gnome.gtk.ColumnView;
+import org.gnome.gtk.ColumnViewColumn;
 import org.gnome.gtk.GtkBuilder;
-
+import org.gnome.gtk.Inscription;
+import org.gnome.gtk.ListItem;
+import org.gnome.gtk.SignalListItemFactory;
 import org.gnome.gtk.Window;
 
 import org.tso.ldap.util.GuiUtils;
 
+import io.github.jwharm.javagi.gobject.types.Types;
+
 public class Navigator {
 
-    private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
-
+    
     Window mainWindow;
     Connection connection;
 
-    ArrayList<Object> asHex(byte[] buf) {
+    public static final class Row extends GObject {
 
-        var values = new ArrayList<Object>(2);
+        public static Type gtype = Types.register(Row.class);
+        public String name;
+        public String oid;
+        public String syntax;
+        public String primitiveType;
+        public String value;
 
-        StringBuffer asciiChars = new StringBuffer();
+        public Row(String name, String oid, String syntax, String primitiveType, String value) {
 
-        String[] hex = new String[16];
-
-        for (int iHex = 0; iHex < hex.length; iHex++) {
-            hex[iHex] = "";
-        }
-
-        for (int i = 0, c = 0; i < buf.length; i++, c++) {
-            char[] chars = new char[2];
-
-            chars[0] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
-            chars[1] = HEX_CHARS[buf[i] & 0x0F];
-
-            hex[c] = new String(chars);
-
-            asciiChars.append(Character.isLetterOrDigit(buf[i]) ? (char) buf[i] : '.');
+            this.name = name;
+            this.oid = oid;
+            this.syntax = syntax;
+            this.primitiveType = primitiveType;
+            this.value = value;
 
         }
 
-        values.add(hex);
-        values.add(asciiChars);
+        public String getName() {
+            return this.name;
+        }
 
-        return values;
+        public String getOid() {
+            return this.oid;
+        }
+
+        public String getSyntax() {
+            return this.syntax;
+        }
+
+        public String getPrimitiveType() {
+            return this.primitiveType;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+
+    }
+
+    void setupColumns(ColumnView columnview) {
+        var columnFactory = new SignalListItemFactory();
+
+        columnFactory.onSetup(item -> {
+            var listitem = (ListItem) item;
+            var inscription = Inscription.builder()
+                    .setXalign(0)
+                    .build();
+            listitem.setChild(inscription);
+
+        });
+
+        columnFactory.onBind(item -> {
+            var listitem = (ListItem) item;
+            var inscription = (Inscription) listitem.getChild();
+
+            if (inscription != null) {
+                var row = (Row) listitem.getItem();
+                inscription.setText(row.getName());
+            }
+        });
+
+        var column = new ColumnViewColumn("", columnFactory);
+        column.setExpand(true);
+
+        columnview.appendColumn(column);
+
     }
 
     void open() {
 
+        connection.show();
+        
     }
 
     public void activate(Application app) {
@@ -93,5 +140,5 @@ public class Navigator {
     public static void main(String[] args) {
         new Navigator(args);
     }
-    
+
 }

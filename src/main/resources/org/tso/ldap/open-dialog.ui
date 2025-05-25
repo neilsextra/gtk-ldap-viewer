@@ -1,18 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <object class="GtkWindow" id="openDialog">
-    <property name="default-width">600</property>
-    <property name="default-height">400</property>
+    <property name="default-width">400</property>
+    <property name="default-height">150</property>
     <property name="visible">false</property>
     <property name="resizable">false</property>
     <property name="modal">true</property>
     <property name="title" translatable="1">Open LDAP Connection</property>
-
-    <child type="action">
-      <object class="GtkButton" id="button_cancel" />
-    </child>
-    <child type="action">
-      <object class="GtkButton" id="button_ok">
+    <child>
+      <object class="GtkGrid">
+        <child>
+          <object class="GtkBox" id="vbox1">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+              <property name="column-span">1</property>
+            </layout>
+            <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+            <property name="hexpand">1</property>
+            <child>
+              <object class="GtkEntry" id="connection">
+                <property name="placeholder_text">ldap://&lt;host&gt;:389@&lt;userid&gt;:&lt;password&gt;</property>
+                <property name="hexpand">1</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="margin_start">14</property>
+                <property name="margin_end">14</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="vbox2">
+            <property name="hexpand">1</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">1</property>
+               <property name="column-span">1</property>
+            </layout>
+            <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+            <property name="hexpand">1</property>
+            <child type="action">
+              <object class="GtkButton" id="button_cancel">
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="margin_start">320</property>
+                <property name="margin_end">0</property>            
+                <property name="icon-name">object-select-symbolic</property>
+              </object>
+            </child>
+            <child type="action">
+              <object class="GtkButton" id="button_ok">
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="margin_start">5</property>
+                <property name="margin_end">14</property>            
+                <property name="icon-name">window-close-symbolic</property>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
   </object>
