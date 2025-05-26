@@ -9,6 +9,7 @@ import org.apache.directory.api.ldap.model.exception.LdapException;
 
 public class Connection {
     HashMap<String, String> properties;
+    LdapConnection connection;
     
     public Connection(String url) throws Exception {
 		this.properties = new HashMap<>();
@@ -27,7 +28,7 @@ public class Connection {
 
     }
 
-    LdapConnection connect() throws LdapException {
+    Connection connect() throws LdapException {
         LdapConnectionConfig config = new LdapConnectionConfig();
 
         config.setLdapHost( this.properties.get("host") );
@@ -39,7 +40,13 @@ public class Connection {
         
          factory.setTimeOut( 10000 );
 
-        return factory.newLdapConnection();
+        this.connection = factory.newLdapConnection();
+
+        return this;
+    }
+
+    LdapConnection getLdapConnection() {
+        return this.connection;
     }
 
 }

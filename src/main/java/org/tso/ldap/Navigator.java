@@ -12,6 +12,7 @@ import org.gnome.gtk.GtkBuilder;
 import org.gnome.gtk.Inscription;
 import org.gnome.gtk.ListItem;
 import org.gnome.gtk.NoSelection;
+import org.gnome.gtk.SearchEntry;
 import org.gnome.gtk.Window;
 import org.tso.ldap.util.GuiUtils;
 
@@ -154,6 +155,12 @@ public class Navigator {
 
     }
 
+    void search() {
+
+        System.out.println("Searching");
+
+    }
+
     public void activate(Application app) {
         GtkBuilder builder = new GtkBuilder();
 
@@ -161,13 +168,11 @@ public class Navigator {
             var uiDefinition = GuiUtils.getDefintion("/org/tso/ldap/navigator.ui");
 
             builder.addFromString(uiDefinition, uiDefinition.length());
-
             mainWindow = (Window) builder.getObject("main");
 
             var openToolbarButton = (Button) builder.getObject("openToolbarButton");
 
             openToolbarButton.onClicked(this::open);
-
             connection = new ConnectionDialog("/org/tso/ldap/open-dialog.ui");
 
             columnView = (ColumnView) builder.getObject("attributesViewer");
@@ -175,10 +180,12 @@ public class Navigator {
             columnView.setShowColumnSeparators(true);
 
             store = new ListStore<>(Row.gtype);
-
             setupColumns(columnView);
-
             columnView.setModel(new NoSelection<Row>(store));
+
+            var searchEntry = (SearchEntry) builder.getObject("search");
+
+            searchEntry.onActivate(this::search);
 
             mainWindow.setApplication(app);
 

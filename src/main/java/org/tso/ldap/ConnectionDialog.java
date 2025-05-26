@@ -34,12 +34,14 @@ public class ConnectionDialog {
 
                 ConnectionDialog.this.connection.connect();
 
+                System.out.println("Connection Successful");
+
                 window.close();
 
             } catch (Exception e) {
                AlertDialog.builder()
                         .setModal(true)
-                        .setMessage("Connection Error")
+                        .setMessage("Connection")
                         .setDetail(e.getMessage())
                         .build()
                         .show(ConnectionDialog.this.window); 
