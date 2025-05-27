@@ -19,13 +19,13 @@ import org.tso.ldap.util.GuiUtils;
 import io.github.jwharm.javagi.gobject.types.Types;
 
 public class Navigator {
-
-    
     Window mainWindow;
-    ConnectionDialog connection;
+    ConnectionDialog connectionDialog;
     ListStore<Row> store;
     ColumnView columnView;
-
+    SearchEntry searchEntry;
+    Connection connection = null;
+    
     public static final class Row extends GObject {
 
         public static Type gtype = Types.register(Row.class);
@@ -151,13 +151,13 @@ public class Navigator {
 
     void open() {
 
-        connection.show();
+        connectionDialog.show();
 
     }
 
     void search() {
 
-        System.out.println("Searching");
+        System.out.println("Searching: " + searchEntry.getText());
 
     }
 
@@ -173,7 +173,15 @@ public class Navigator {
             var openToolbarButton = (Button) builder.getObject("openToolbarButton");
 
             openToolbarButton.onClicked(this::open);
-            connection = new ConnectionDialog("/org/tso/ldap/open-dialog.ui");
+            
+            connectionDialog = new ConnectionDialog("/org/tso/ldap/open-dialog.ui",
+                new ConnectionDialog.Callback() {
+                    public void onConnection(Connection connection) {
+                        Navigator.this.connection = connection;
+                        Navigator.this.searchEntry.setEditable(true);
+
+                    }
+                });
 
             columnView = (ColumnView) builder.getObject("attributesViewer");
 
@@ -183,10 +191,10 @@ public class Navigator {
             setupColumns(columnView);
             columnView.setModel(new NoSelection<Row>(store));
 
-            var searchEntry = (SearchEntry) builder.getObject("search");
+            searchEntry = (SearchEntry) builder.getObject("search");
 
             searchEntry.onActivate(this::search);
-
+  
             mainWindow.setApplication(app);
 
             mainWindow.setVisible(true);

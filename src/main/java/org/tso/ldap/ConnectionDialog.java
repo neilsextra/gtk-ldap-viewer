@@ -9,12 +9,23 @@ import org.gnome.gtk.EntryBuffer;
 
 import org.tso.ldap.util.GuiUtils;
 
+
 public class ConnectionDialog {
+    interface Callback {
+
+        void onConnection(Connection connection);
+
+    }
+   
     Window window;
     GtkBuilder builder;
     Connection connection = null;
+    Callback callback;
 
-    ConnectionDialog(String definition) throws Exception {
+    ConnectionDialog(final String definition, Callback callback) throws Exception {
+
+        this.callback = callback;
+
         builder = new GtkBuilder();
 
         var uiDefinition = GuiUtils.getDefintion(definition);
@@ -30,11 +41,13 @@ public class ConnectionDialog {
             EntryBuffer buffer = connectionUrl.getBuffer();
 
             try {
-                ConnectionDialog.this.connection = new Connection(buffer.getText());
+                connection = new Connection(buffer.getText());
 
                 ConnectionDialog.this.connection.connect();
 
                 System.out.println("Connection Successful");
+
+                callback.onConnection(connection);
 
                 window.close();
 
