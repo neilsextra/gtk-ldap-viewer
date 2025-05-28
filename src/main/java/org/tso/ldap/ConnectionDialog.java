@@ -22,7 +22,7 @@ public class ConnectionDialog {
     Connection connection = null;
     Callback callback;
 
-    ConnectionDialog(final String definition, Callback callback) throws Exception {
+    ConnectionDialog(Window parent, final String definition, Callback callback) throws Exception {
 
         this.callback = callback;
 
@@ -33,6 +33,8 @@ public class ConnectionDialog {
         builder.addFromString(uiDefinition, uiDefinition.length());
 
         this.window = (Window) builder.getObject("openDialog");
+
+        this.window.setParent(parent);
 
         final var okButton = (Button) builder.getObject("button_ok");
         final var connectionUrl = (Entry) builder.getObject("connection");

@@ -72,8 +72,7 @@
                     <property name="vscrollbar-policy">GTK_POLICY_AUTOMATIC</property>
 
                     <child>
-                      <object class="GtkListBox" id="dnList">
-                        <property name="selection-mode">none</property>
+                      <object class="GtkListView" id="selectionView">
                       </object>
                     </child>
                   </object>

@@ -1,5 +1,10 @@
 package org.tso.ldap;
 
+import java.util.List;
+import java.util.ArrayList;
+
+import org.apache.directory.api.ldap.model.entry.Entry;
+
 import org.gnome.gio.ApplicationFlags;
 import org.gnome.gio.ListStore;
 import org.gnome.glib.Type;
@@ -10,21 +15,30 @@ import org.gnome.gtk.ColumnView;
 import org.gnome.gtk.ColumnViewColumn;
 import org.gnome.gtk.GtkBuilder;
 import org.gnome.gtk.Inscription;
+import org.gnome.gtk.Label;
+import org.gnome.gtk.ListView;
 import org.gnome.gtk.ListItem;
-import org.gnome.gtk.NoSelection;
+import org.gnome.gtk.SingleSelection;
 import org.gnome.gtk.SearchEntry;
+import org.gnome.gtk.SignalListItemFactory;
 import org.gnome.gtk.Window;
+import org.gnome.gtk.Align;
+
 import org.tso.ldap.util.GuiUtils;
 
+import io.github.jwharm.javagi.gio.ListIndexModel;
 import io.github.jwharm.javagi.gobject.types.Types;
 
 public class Navigator {
     Window mainWindow;
     ConnectionDialog connectionDialog;
     ListStore<Row> store;
+    ListView listView;
     ColumnView columnView;
     SearchEntry searchEntry;
     Connection connection = null;
+    ArrayList<Entry> entries;
+    ListIndexModel listIndexModel;
     
     public static final class Row extends GObject {
 
@@ -149,6 +163,39 @@ public class Navigator {
 
     }
 
+    void setupList(ListView listView) {
+        SignalListItemFactory factory = new SignalListItemFactory();
+
+        factory.onSetup(object -> {
+            ListItem listitem = (ListItem) object;
+            Label label = new Label("");
+
+            label.setHalign(Align.START);
+
+            listitem.setChild(label);
+        });
+        
+        factory.onBind(object -> {
+            ListItem listitem = (ListItem) object;
+            Label label = (Label) listitem.getChild();
+            ListIndexModel.ListIndex item = (ListIndexModel.ListIndex) listitem.getItem();
+            
+            if (label == null || item == null)
+                return;
+
+             int index = item.getIndex();
+            
+            Entry entry = entries.get(index);
+            label.setLabel(entry.getDn().toString());
+        });
+
+        entries = new ArrayList<Entry>();
+        listIndexModel = new ListIndexModel(entries.size());
+        listView.setModel(new SingleSelection<>(listIndexModel));
+        listView.setFactory(factory);
+
+    }
+
     void open() {
 
         connectionDialog.show();
@@ -157,7 +204,25 @@ public class Navigator {
 
     void search() {
 
-        System.out.println("Searching: " + searchEntry.getText());
+        try {
+            System.out.println("Searching: " + searchEntry.getText());
+
+            listIndexModel.clear();
+
+            Search search = new Search(this.connection);
+            entries.clear();
+
+            search.search(searchEntry.getText(), entries);
+
+            listIndexModel.setSize(entries.size());
+
+            for (Entry entry : entries) {
+                System.out.println(entry.getDn());
+            }
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -174,7 +239,7 @@ public class Navigator {
 
             openToolbarButton.onClicked(this::open);
             
-            connectionDialog = new ConnectionDialog("/org/tso/ldap/open-dialog.ui",
+            connectionDialog = new ConnectionDialog(mainWindow, "/org/tso/ldap/open-dialog.ui",
                 new ConnectionDialog.Callback() {
                     public void onConnection(Connection connection) {
                         Navigator.this.connection = connection;
@@ -184,12 +249,15 @@ public class Navigator {
                 });
 
             columnView = (ColumnView) builder.getObject("attributesViewer");
-
+ 
             columnView.setShowColumnSeparators(true);
 
             store = new ListStore<>(Row.gtype);
             setupColumns(columnView);
-            columnView.setModel(new NoSelection<Row>(store));
+            columnView.setModel(new SingleSelection<Row>(store));
+
+            listView = (ListView) builder.getObject("selectionView");
+            setupList(listView);
 
             searchEntry = (SearchEntry) builder.getObject("search");
 

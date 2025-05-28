@@ -16,10 +16,16 @@ public class Search {
     public void search(String dn, ArrayList<Entry> entries) throws Exception {
         try ( EntryCursor cursor = this.connection.getLdapConnection().search( dn, "(objectclass=*)", SearchScope.ONELEVEL ))
         {
-            for ( Entry entry : cursor )
+            for ( Entry entry : cursor ) {
             
                 System.out.println( entry );
 
-            }      
+                entries.add(entry);
+
+            }   
+            
+        }
+
     } 
+    
 }
