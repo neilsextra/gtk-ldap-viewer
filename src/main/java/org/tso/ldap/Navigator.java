@@ -205,8 +205,6 @@ public class Navigator {
     void search() {
 
         try {
-            System.out.println("Searching: " + searchEntry.getText());
-
             listIndexModel.clear();
 
             Search search = new Search(this.connection);
@@ -244,6 +242,8 @@ public class Navigator {
                     public void onConnection(Connection connection) {
                         Navigator.this.connection = connection;
                         Navigator.this.searchEntry.setEditable(true);
+                        
+                        listIndexModel.clear();
 
                     }
                 });
