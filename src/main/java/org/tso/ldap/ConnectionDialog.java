@@ -11,6 +11,8 @@ import org.tso.ldap.util.GuiUtils;
 
 
 public class ConnectionDialog {
+
+    @FunctionalInterface
     interface Callback {
 
         void onConnection(Connection connection);

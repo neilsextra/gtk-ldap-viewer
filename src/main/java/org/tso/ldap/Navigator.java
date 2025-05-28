@@ -237,16 +237,16 @@ public class Navigator {
             openToolbarButton.onClicked(this::open);
             
             connectionDialog = new ConnectionDialog(mainWindow, "/org/tso/ldap/open-dialog.ui",
-                new ConnectionDialog.Callback() {
-                    public void onConnection(Connection connection) {
-                        Navigator.this.connection = connection;
-                        Navigator.this.searchEntry.setEditable(true);
-                        
-                        entries.clear();
-                        listIndexModel.setSize(entries.size());
+                connection -> {        
+                    Navigator.this.connection = connection;
+                    Navigator.this.searchEntry.setEditable(true);
+                    
+                    entries.clear();
+                    listIndexModel.setSize(entries.size());
 
-                    }
-                });
+                }
+            
+            );
 
             columnView = (ColumnView) builder.getObject("attributesViewer");
  
