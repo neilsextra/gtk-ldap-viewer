@@ -1,6 +1,5 @@
 package org.tso.ldap;
 
-import java.util.List;
 import java.util.ArrayList;
 
 import org.apache.directory.api.ldap.model.entry.Entry;
@@ -205,10 +204,10 @@ public class Navigator {
     void search() {
 
         try {
-            listIndexModel.clear();
+            entries.clear();
+            listIndexModel.setSize(entries.size());
 
             Search search = new Search(this.connection);
-            entries.clear();
 
             search.search(searchEntry.getText(), entries);
 
@@ -243,7 +242,8 @@ public class Navigator {
                         Navigator.this.connection = connection;
                         Navigator.this.searchEntry.setEditable(true);
                         
-                        listIndexModel.clear();
+                        entries.clear();
+                        listIndexModel.setSize(entries.size());
 
                     }
                 });
