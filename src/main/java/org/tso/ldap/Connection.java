@@ -5,11 +5,12 @@ import java.util.HashMap;
 import org.apache.directory.ldap.client.api.DefaultLdapConnectionFactory;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
-import org.apache.directory.api.ldap.model.exception.LdapException;
+
 
 public class Connection {
     HashMap<String, String> properties;
     LdapConnection connection;
+    SchemaReader schemaReader;
     
     public Connection(String url) throws Exception {
 		this.properties = new HashMap<>();
@@ -28,7 +29,7 @@ public class Connection {
 
     }
 
-    Connection connect() throws LdapException {
+    Connection connect() throws Exception {
         LdapConnectionConfig config = new LdapConnectionConfig();
 
         config.setLdapHost( this.properties.get("host") );
@@ -41,6 +42,8 @@ public class Connection {
          factory.setTimeOut( 10000 );
 
         this.connection = factory.newLdapConnection();
+
+        schemaReader = new SchemaReader(this.connection);
 
         return this;
     }

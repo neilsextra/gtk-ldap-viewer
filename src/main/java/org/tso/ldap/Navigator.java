@@ -19,6 +19,7 @@ import org.gnome.gtk.ListView;
 import org.gnome.gtk.ListItem;
 import org.gnome.gtk.SingleSelection;
 import org.gnome.gtk.SearchEntry;
+import org.gnome.gtk.SelectionModel;
 import org.gnome.gtk.SignalListItemFactory;
 import org.gnome.gtk.Window;
 import org.gnome.gtk.Align;
@@ -192,6 +193,15 @@ public class Navigator {
         listIndexModel = new ListIndexModel(entries.size());
         listView.setModel(new SingleSelection<>(listIndexModel));
         listView.setFactory(factory);
+        
+        ((SingleSelection<?>)(listView.getModel())).onSelectionChanged(new SelectionModel.SelectionChangedCallback() {
+            public void run(int position, int nItems)  {
+                int selected = ((SingleSelection<?>)(listView.getModel())).getSelected();
+                
+                Entry entry = entries.get(selected);
+                System.out.println("Selected: " +  selected + ":" + entry.getDn().toString());
+            }       
+        });
 
     }
 
