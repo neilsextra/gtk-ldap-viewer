@@ -19,12 +19,14 @@ import org.gnome.gtk.Inscription;
 import org.gnome.gtk.Label;
 import org.gnome.gtk.ListView;
 import org.gnome.gtk.ListItem;
+import org.gnome.gtk.TextView;
 import org.gnome.gtk.SingleSelection;
 import org.gnome.gtk.SearchEntry;
 import org.gnome.gtk.SelectionModel;
 import org.gnome.gtk.SignalListItemFactory;
 import org.gnome.gtk.Window;
 import org.gnome.gtk.Align;
+import org.gnome.gtk.TextBuffer;
 
 import org.tso.ldap.util.GuiUtils;
 
@@ -33,6 +35,7 @@ import io.github.jwharm.javagi.gobject.types.Types;
 
 public class Navigator {
     Window mainWindow;
+    TextView attributeViewer;
     ConnectionDialog connectionDialog;
     ListStore<Row> store;
     ListView listView;
@@ -205,13 +208,15 @@ public class Navigator {
             Label label = (Label) listitem.getChild();
             ListIndexModel.ListIndex item = (ListIndexModel.ListIndex) listitem.getItem();
             
-            if (label == null || item == null)
+            if (label == null || item == null) 
                 return;
 
-             int index = item.getIndex();
+            int index = item.getIndex();
             
             Entry entry = entries.get(index);
+            
             label.setLabel(entry.getDn().toString());
+
         });
 
         entries = new ArrayList<Entry>();
@@ -227,11 +232,11 @@ public class Navigator {
                 int selected = ((SingleSelection<?>)(listView.getModel())).getSelected();
                 
                 Entry entry = entries.get(selected);
-                System.out.println("Selected: " +  selected + ":" + entry.getDn().toString());
-
-                 Navigator.this.buildRows(entry);
+ 
+                Navigator.this.buildRows(entry);
 
             }       
+
         });
 
     }
@@ -252,10 +257,6 @@ public class Navigator {
 
             listIndexModel.setSize(entries.size());
 
-            for (Entry entry : entries) {
-                System.out.println(entry.getDn());
-            }
-
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -269,7 +270,9 @@ public class Navigator {
             var uiDefinition = GuiUtils.getDefintion("/org/tso/ldap/navigator.ui");
 
             builder.addFromString(uiDefinition, uiDefinition.length());
+           
             mainWindow = (Window) builder.getObject("main");
+            attributeViewer = (TextView)builder.getObject("attributeViewer");
 
             var openToolbarButton = (Button) builder.getObject("openToolbarButton");
 
@@ -293,7 +296,27 @@ public class Navigator {
 
             store = new ListStore<>(Row.gtype);
             setupColumns(columnView);
+
             columnView.setModel(new SingleSelection<Row>(store));
+
+            ((SingleSelection<?>)(columnView.getModel())).onSelectionChanged(new SelectionModel.SelectionChangedCallback() {
+                public void run(int position, int nItems)  {
+                
+                    int selected = ((SingleSelection<?>)(columnView.getModel())).getSelected();
+  
+                    Row row = store.get(selected);
+
+                    TextBuffer buffer = new TextBuffer();
+
+                    String description = "Attribute: " + row.getName();
+
+                    buffer.setText(description, description.length());
+                    
+                    attributeViewer.setBuffer(buffer);
+                }   
+
+            });
+
 
             listView = (ListView) builder.getObject("selectionView");
             setupList(listView);
