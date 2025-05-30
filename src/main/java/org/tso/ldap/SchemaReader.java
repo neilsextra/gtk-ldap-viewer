@@ -1,19 +1,21 @@
 package org.tso.ldap;
 
 import java.util.Set;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import org.apache.directory.api.ldap.model.schema.SchemaManager;
 import org.apache.directory.api.ldap.model.schema.SchemaObjectWrapper;
 import org.apache.directory.ldap.client.api.LdapConnection;
+import org.apache.directory.api.ldap.model.schema.AttributeType;
 
 public class SchemaReader {
     LdapConnection ldapConnection;
+     Dictionary<String, AttributeType> defintions = new Hashtable<>();
 
     public SchemaReader(LdapConnection ldapConnection) throws Exception {
 
         this.ldapConnection = ldapConnection;
-   
-        System.out.println("Print inside Schema Reader");
         
         this.ldapConnection.loadSchemaRelaxed();
 
@@ -33,17 +35,24 @@ public class SchemaReader {
             Set<SchemaObjectWrapper> content =  schema.getContent();
 
             for (var attribute : content) {
-                System.out.println("Attribute: " + attribute.toString());
-                System.out.println("Attribute: " + attribute.get().toString());
-                System.out.println("Attribute Name: " + attribute.get().getName());
-                System.out.println("Attribute Oid: " + attribute.get().getOid());
-                System.out.println("Attribute Specification: " + attribute.get().getSpecification());
-                System.out.println("Attribute Description: " + attribute.get().getDescription());
-                System.out.println("Attribute Rdn: " + attribute.get().getObjectType().getRdn());
+  
+                if (attribute.get() instanceof AttributeType) {
+                   
+                    if  (((AttributeType)attribute.get()).getSyntaxName() != null) {
+                        defintions.put(((AttributeType)attribute.get()).getSyntaxName(),  ((AttributeType)attribute.get()));
+                    } 
+
+                }
 
             }
             
         });
+
+    }
+
+    public AttributeType getDefinition(String name) {
+
+        return defintions.get(name);
 
     }
 

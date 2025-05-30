@@ -43,13 +43,24 @@ public class Connection {
 
         this.connection = factory.newLdapConnection();
 
-        schemaReader = new SchemaReader(this.connection);
+        this.schemaReader = new SchemaReader(this.connection);
 
         return this;
     }
 
     LdapConnection getLdapConnection() {
         return this.connection;
+    }
+
+
+    SchemaReader getetSchemaReader() {
+        return this.schemaReader;
+    }
+
+
+    public void close() throws Exception {
+
+        this.connection.close();
     }
 
 }

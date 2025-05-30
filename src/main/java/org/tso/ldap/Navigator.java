@@ -3,6 +3,8 @@ package org.tso.ldap;
 import java.util.ArrayList;
 
 import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.entry.Attribute;
+import org.apache.directory.api.ldap.model.schema.AbstractSchemaObject;
 
 import org.gnome.gio.ApplicationFlags;
 import org.gnome.gio.ListStore;
@@ -81,6 +83,29 @@ public class Navigator {
 
     }
 
+    void buildRows(Entry entry) {
+
+        for (Attribute attribute : entry.getAttributes()) {
+
+            System.out.println("Attribute (getId()): " + attribute.getId());
+            System.out.println("Attribute (getOid()): " + attribute.getAttributeType().getOid());
+            System.out.println("Attribute (getName()): " + attribute.getAttributeType().getName());
+            System.out.println("Attribute (getSyntaxName()): " + attribute.getAttributeType().getSyntaxName());
+            System.out.println("Attribute (getSyntaxOid()): " + attribute.getAttributeType().getSyntaxOid());
+            System.out.println("Attribute (getValue()): " + attribute.get().getString());
+
+            Row row = new Row(attribute.getAttributeType().getName(), 
+                              attribute.getAttributeType().getOid(),
+                              attribute.getAttributeType().getSyntaxOid(),
+                              attribute.get().isHumanReadable() ? "String" : "Binary",
+                              attribute.get().isHumanReadable() ? attribute.get().getString() : attribute.get().getEscaped());
+
+            this.store.add(0, row);
+
+        }
+
+    }
+
     void setupColumns(ColumnView columnview) {
         var columnFactoryName = GuiUtils.createSignalListItemFactory();
 
@@ -130,7 +155,7 @@ public class Navigator {
             var listitem = (ListItem) item;
             var inscription = (Inscription) listitem.getChild();
             var row = (Row) listitem.getItem();
-            inscription.setText(row.getPrimitiveType());
+            inscription.setText(row.getValue());
 
         });
 
@@ -138,7 +163,7 @@ public class Navigator {
         var columnOid = new ColumnViewColumn("OID", columnFactoryOid);
         var columnSyntax = new ColumnViewColumn("Syntax", columnFactorySyntax);
         var columnType = new ColumnViewColumn("Type", columnFactorType);
-        var columnValue = new ColumnViewColumn("Value", columnFactorType);
+        var columnValue = new ColumnViewColumn("Value", columnFactorValue);
 
         columnName.setFixedWidth(250);
         columnName.setResizable(true);
@@ -171,8 +196,8 @@ public class Navigator {
             Label label = new Label("");
 
             label.setHalign(Align.START);
-
             listitem.setChild(label);
+
         });
         
         factory.onBind(object -> {
@@ -196,19 +221,23 @@ public class Navigator {
         
         ((SingleSelection<?>)(listView.getModel())).onSelectionChanged(new SelectionModel.SelectionChangedCallback() {
             public void run(int position, int nItems)  {
+               
+                Navigator.this.store.removeAll();
+                
                 int selected = ((SingleSelection<?>)(listView.getModel())).getSelected();
                 
                 Entry entry = entries.get(selected);
                 System.out.println("Selected: " +  selected + ":" + entry.getDn().toString());
+
+                 Navigator.this.buildRows(entry);
+
             }       
         });
 
     }
 
     void open() {
-
         connectionDialog.show();
-
     }
 
     void search() {
