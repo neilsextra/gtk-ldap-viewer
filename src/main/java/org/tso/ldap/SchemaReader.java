@@ -35,6 +35,11 @@ public class SchemaReader {
             for (var attribute : content) {
                 System.out.println("Attribute: " + attribute.toString());
                 System.out.println("Attribute: " + attribute.get().toString());
+                System.out.println("Attribute Name: " + attribute.get().getName());
+                System.out.println("Attribute Oid: " + attribute.get().getOid());
+                System.out.println("Attribute Specification: " + attribute.get().getSpecification());
+                System.out.println("Attribute Description: " + attribute.get().getDescription());
+                System.out.println("Attribute Rdn: " + attribute.get().getObjectType().getRdn());
 
             }
             
