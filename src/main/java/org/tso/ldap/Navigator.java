@@ -27,6 +27,7 @@ import org.gnome.gtk.SignalListItemFactory;
 import org.gnome.gtk.Window;
 import org.gnome.gtk.Align;
 import org.gnome.gtk.TextBuffer;
+import org.gnome.gtk.TextIter;
 
 import org.tso.ldap.util.GuiUtils;
 
@@ -306,12 +307,18 @@ public class Navigator {
   
                     Row row = store.get(selected);
 
+                    attributeViewer.setMonospace(true);
                     TextBuffer buffer = new TextBuffer();
+                    TextIter   iter = new TextIter();
+                    buffer.getStartIter(iter);
 
-                    String description = "Attribute: " + row.getName();
 
-                    buffer.setText(description, description.length());
+                    String description = "<b>Attribute:</b>" + row.getName() + "\n" + 
+                                        "<b>OID:</b>" + row.getOid() + "\n" +
+                                        "<b>Syntax:</b>" + row.getSyntax();
                     
+ 
+                    buffer.insertMarkup(iter, description, -1);
                     attributeViewer.setBuffer(buffer);
                 }   
 
