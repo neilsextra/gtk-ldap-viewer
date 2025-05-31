@@ -2,14 +2,13 @@ package org.tso.ldap;
 
 import java.util.ArrayList;
 
-import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Attribute;
-import org.apache.directory.api.ldap.model.schema.AbstractSchemaObject;
-
+import org.apache.directory.api.ldap.model.entry.Entry;
 import org.gnome.gio.ApplicationFlags;
 import org.gnome.gio.ListStore;
 import org.gnome.glib.Type;
 import org.gnome.gobject.GObject;
+import org.gnome.gtk.Align;
 import org.gnome.gtk.Application;
 import org.gnome.gtk.Button;
 import org.gnome.gtk.ColumnView;
@@ -17,18 +16,16 @@ import org.gnome.gtk.ColumnViewColumn;
 import org.gnome.gtk.GtkBuilder;
 import org.gnome.gtk.Inscription;
 import org.gnome.gtk.Label;
-import org.gnome.gtk.ListView;
 import org.gnome.gtk.ListItem;
-import org.gnome.gtk.TextView;
-import org.gnome.gtk.SingleSelection;
+import org.gnome.gtk.ListView;
 import org.gnome.gtk.SearchEntry;
 import org.gnome.gtk.SelectionModel;
 import org.gnome.gtk.SignalListItemFactory;
-import org.gnome.gtk.Window;
-import org.gnome.gtk.Align;
+import org.gnome.gtk.SingleSelection;
 import org.gnome.gtk.TextBuffer;
 import org.gnome.gtk.TextIter;
-
+import org.gnome.gtk.TextView;
+import org.gnome.gtk.Window;
 import org.tso.ldap.util.GuiUtils;
 
 import io.github.jwharm.javagi.gio.ListIndexModel;
@@ -43,7 +40,7 @@ public class Navigator {
     ColumnView columnView;
     SearchEntry searchEntry;
     Connection connection = null;
-    ArrayList<Entry> entries;
+    ArrayList<Entry> entries = new ArrayList<Entry>();
     ListIndexModel listIndexModel;
     
     public static final class Row extends GObject {
@@ -220,24 +217,18 @@ public class Navigator {
 
         });
 
-        entries = new ArrayList<Entry>();
         listIndexModel = new ListIndexModel(entries.size());
         listView.setModel(new SingleSelection<>(listIndexModel));
         listView.setFactory(factory);
         
-        ((SingleSelection<?>)(listView.getModel())).onSelectionChanged(new SelectionModel.SelectionChangedCallback() {
-            public void run(int position, int nItems)  {
-               
-                Navigator.this.store.removeAll();
-                
-                int selected = ((SingleSelection<?>)(listView.getModel())).getSelected();
-                
-                Entry entry = entries.get(selected);
- 
-                Navigator.this.buildRows(entry);
-
-            }       
-
+        ((SingleSelection<?>)(listView.getModel())).onSelectionChanged((int position, int nItems) -> {
+            Navigator.this.store.removeAll();
+            
+            int selected = ((SingleSelection<?>)(listView.getModel())).getSelected();
+            
+            Entry entry = entries.get(selected);
+            
+            Navigator.this.buildRows(entry);
         });
 
     }
@@ -312,12 +303,18 @@ public class Navigator {
                     TextIter   iter = new TextIter();
                     buffer.getStartIter(iter);
 
+                    System.out.println("Type: " + connection.getSchemaBrowser().getType( row.getSyntax()));
+                    System.out.println("Object: " + connection.getSchemaBrowser().getObject( row.getName()));
+                    System.out.println("Definition: " + connection.getSchemaBrowser().getDefinition( row.getName()));
 
-                    String description = "<b>Attribute:</b>" + row.getName() + "\n" + 
+                    String description = "<span weight=\"ultraheavy\" size=\"x-large\">Definition</span>" + "\n" + 
+                                        "<b>Class:</b>" + row.getName() + "\n" + 
                                         "<b>OID:</b>" + row.getOid() + "\n" +
-                                        "<b>Syntax:</b>" + row.getSyntax();
+                                        "<b>Syntax:</b>" + row.getSyntax() + "\n" +
+                                        connection.getSchemaBrowser().getType( row.getSyntax()) + "\n\n" +
+                                        "<span weight=\"ultraheavy\"  size=\"x-large\">Value</span>" + "\n" + 
+                                        row.getValue();
                     
- 
                     buffer.insertMarkup(iter, description, -1);
                     attributeViewer.setBuffer(buffer);
                 }   

@@ -1,12 +1,11 @@
 package org.tso.ldap;
 
-import org.gnome.gtk.GtkBuilder;
-import org.gnome.gtk.Window;
 import org.gnome.gtk.AlertDialog;
 import org.gnome.gtk.Button;
 import org.gnome.gtk.Entry;
 import org.gnome.gtk.EntryBuffer;
-
+import org.gnome.gtk.GtkBuilder;
+import org.gnome.gtk.Window;
 import org.tso.ldap.util.GuiUtils;
 
 
@@ -22,11 +21,8 @@ public class ConnectionDialog {
     Window window;
     GtkBuilder builder;
     Connection connection = null;
-    Callback callback;
 
     ConnectionDialog(Window parent, final String definition, Callback callback) throws Exception {
-
-        this.callback = callback;
 
         builder = new GtkBuilder();
 

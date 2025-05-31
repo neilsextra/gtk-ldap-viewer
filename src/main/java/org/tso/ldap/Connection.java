@@ -10,7 +10,7 @@ import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 public class Connection {
     HashMap<String, String> properties;
     LdapConnection connection;
-    SchemaReader schemaReader;
+    SchemaBrowser schemaBrowser;
     
     public Connection(String url) throws Exception {
 		this.properties = new HashMap<>();
@@ -43,7 +43,7 @@ public class Connection {
 
         this.connection = factory.newLdapConnection();
 
-        this.schemaReader = new SchemaReader(this.connection);
+        this.schemaBrowser = new SchemaBrowser(this.connection);
 
         return this;
     }
@@ -53,8 +53,8 @@ public class Connection {
     }
 
 
-    SchemaReader getetSchemaReader() {
-        return this.schemaReader;
+    SchemaBrowser getSchemaBrowser() {
+        return this.schemaBrowser;
     }
 
 

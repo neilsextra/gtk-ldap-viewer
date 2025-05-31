@@ -112,6 +112,10 @@
                     <child>
                       <object class="GtkTextView" id="attributeViewer">
                         <property name="editable">false</property>
+                        <property name="left_margin">10</property>
+                        <property name="right_margin">10</property>
+                        <property name="bottom_margin">10</property>
+                        <property name="top_margin">10</property>
                       </object>
                     </child>
                   </object>
