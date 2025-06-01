@@ -35,6 +35,7 @@ public class Navigator {
     Window mainWindow;
     TextView attributeViewer;
     ConnectionDialog connectionDialog;
+    AboutDialog aboutDialog;
     ListStore<Row> store;
     ListView listView;
     ColumnView columnView;
@@ -237,6 +238,11 @@ public class Navigator {
         connectionDialog.show();
     }
 
+    
+    void about() {
+       aboutDialog.show();
+    }
+
     void search() {
 
         try {
@@ -267,8 +273,10 @@ public class Navigator {
             attributeViewer = (TextView)builder.getObject("attributeViewer");
 
             var openToolbarButton = (Button) builder.getObject("openToolbarButton");
+            var aboutToolbarItem = (Button) builder.getObject("aboutToolbarItem");
 
             openToolbarButton.onClicked(this::open);
+            aboutToolbarItem.onClicked(this::about);
             
             connectionDialog = new ConnectionDialog(mainWindow, "/org/tso/ldap/open-dialog.ui",
                 connection -> {        
@@ -281,6 +289,8 @@ public class Navigator {
                 }
             
             );
+
+            aboutDialog = new AboutDialog(mainWindow, "/org/tso/ldap/about-dialog.ui");
 
             columnView = (ColumnView) builder.getObject("attributesViewer");
  
@@ -302,10 +312,6 @@ public class Navigator {
                     TextBuffer buffer = new TextBuffer();
                     TextIter   iter = new TextIter();
                     buffer.getStartIter(iter);
-
-                    System.out.println("Type: " + connection.getSchemaBrowser().getType( row.getSyntax()));
-                    System.out.println("Object: " + connection.getSchemaBrowser().getObject( row.getName()));
-                    System.out.println("Definition: " + connection.getSchemaBrowser().getDefinition( row.getName()));
 
                     String description = "<span weight=\"ultraheavy\" size=\"x-large\">Definition</span>" + "\n" + 
                                         "<b>Class:</b>" + row.getName() + "\n" + 
