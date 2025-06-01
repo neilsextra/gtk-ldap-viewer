@@ -253,7 +253,6 @@ public class Navigator {
     void open() {
         connectionDialog.show();
     }
-
     
     void about() {
        aboutDialog.show();
