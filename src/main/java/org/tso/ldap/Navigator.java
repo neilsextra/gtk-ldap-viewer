@@ -89,13 +89,6 @@ public class Navigator {
 
         for (Attribute attribute : entry.getAttributes()) {
 
-            System.out.println("Attribute (getId()): " + attribute.getId());
-            System.out.println("Attribute (getOid()): " + attribute.getAttributeType().getOid());
-            System.out.println("Attribute (getName()): " + attribute.getAttributeType().getName());
-            System.out.println("Attribute (getSyntaxName()): " + attribute.getAttributeType().getSyntaxName());
-            System.out.println("Attribute (getSyntaxOid()): " + attribute.getAttributeType().getSyntaxOid());
-            System.out.println("Attribute (getValue()): " + attribute.get().getString());
-
             Row row = new Row(attribute.getAttributeType().getName(), 
                               attribute.getAttributeType().getOid(),
                               attribute.getAttributeType().getSyntaxOid(),
