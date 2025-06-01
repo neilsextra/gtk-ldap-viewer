@@ -101,6 +101,27 @@ public class Navigator {
 
     }
 
+    void selectRow(int selected) {
+        Row row = store.get(selected);
+
+        attributeViewer.setMonospace(true);
+        TextBuffer buffer = new TextBuffer();
+        TextIter   iter = new TextIter();
+        buffer.getStartIter(iter);
+
+        String description = "<span weight=\"ultraheavy\" size=\"x-large\">Definition</span>" + "\n" + 
+                            "<b>Class:</b>" + row.getName() + "\n" + 
+                            "<b>OID:</b>" + row.getOid() + "\n" +
+                            "<b>Syntax:</b>" + row.getSyntax() + "\n" +
+                            connection.getSchemaBrowser().getType( row.getSyntax()) + "\n\n" +
+                            "<span weight=\"ultraheavy\"  size=\"x-large\">Value</span>" + "\n" + 
+                            row.getValue();
+        
+        buffer.insertMarkup(iter, description, -1);
+        attributeViewer.setBuffer(buffer);
+                
+    }
+
     void setupColumns(ColumnView columnview) {
         var columnFactoryName = GuiUtils.createSignalListItemFactory();
 
@@ -223,6 +244,8 @@ public class Navigator {
             Entry entry = entries.get(selected);
             
             Navigator.this.buildRows(entry);
+
+            Navigator.this.selectRow(0);
         });
 
     }
@@ -297,29 +320,10 @@ public class Navigator {
             ((SingleSelection<?>)(columnView.getModel())).onSelectionChanged(new SelectionModel.SelectionChangedCallback() {
                 public void run(int position, int nItems)  {
                 
-                    int selected = ((SingleSelection<?>)(columnView.getModel())).getSelected();
-  
-                    Row row = store.get(selected);
-
-                    attributeViewer.setMonospace(true);
-                    TextBuffer buffer = new TextBuffer();
-                    TextIter   iter = new TextIter();
-                    buffer.getStartIter(iter);
-
-                    String description = "<span weight=\"ultraheavy\" size=\"x-large\">Definition</span>" + "\n" + 
-                                        "<b>Class:</b>" + row.getName() + "\n" + 
-                                        "<b>OID:</b>" + row.getOid() + "\n" +
-                                        "<b>Syntax:</b>" + row.getSyntax() + "\n" +
-                                        connection.getSchemaBrowser().getType( row.getSyntax()) + "\n\n" +
-                                        "<span weight=\"ultraheavy\"  size=\"x-large\">Value</span>" + "\n" + 
-                                        row.getValue();
-                    
-                    buffer.insertMarkup(iter, description, -1);
-                    attributeViewer.setBuffer(buffer);
+                   Navigator.this.selectRow(((SingleSelection<?>)(columnView.getModel())).getSelected());
                 }   
 
             });
-
 
             listView = (ListView) builder.getObject("selectionView");
             setupList(listView);
