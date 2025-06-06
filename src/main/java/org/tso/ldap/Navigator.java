@@ -1,8 +1,7 @@
 package org.tso.ldap;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Vector;
+import java.util.List;
 
 import org.gnome.gio.ApplicationFlags;
 import org.gnome.gio.ListStore;
@@ -41,7 +40,7 @@ public class Navigator {
     ColumnView columnView;
     SearchEntry searchEntry;
     DirectoryConnection connection = null;
-    ArrayList<String> entries = new ArrayList<String>();
+    List<String> entries = new ArrayList<String>();
     ListIndexModel listIndexModel;
     
     public static final class Row extends GObject {
@@ -114,7 +113,7 @@ public class Navigator {
         String description = "<span weight=\"ultraheavy\" size=\"x-large\">Definition</span>" + "\n" + 
                             "<b>Class:</b>" + row.getName() + "\n" + 
                             "<b>OID:</b>" + row.getOid() + "\n" +
-                            "<b>Syntax:</b>" + row.getSyntax() + "\n" +
+                            "<b>Syntax:</b>" + row.getSyntax() + "\n\n" +
                             "<span weight=\"ultraheavy\"  size=\"x-large\">Value</span>" + "\n" + 
                             row.getValue();
         
@@ -263,10 +262,10 @@ public class Navigator {
 
         try {
             entries.clear();
-            listIndexModel.setSize(entries.size());
 
-   
-            this.connection.getDirectoryExplorer().search(searchEntry.getText());
+            listIndexModel.setSize(entries.size());
+            
+            entries = this.connection.getDirectoryExplorer().search(searchEntry.getText());
 
             listIndexModel.setSize(entries.size());
 
@@ -325,6 +324,7 @@ public class Navigator {
             });
 
             listView = (ListView) builder.getObject("selectionView");
+            
             setupList(listView);
 
             searchEntry = (SearchEntry) builder.getObject("search");
