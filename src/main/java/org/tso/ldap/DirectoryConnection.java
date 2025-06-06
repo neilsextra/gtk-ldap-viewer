@@ -6,16 +6,17 @@ import org.apache.directory.ldap.client.api.DefaultLdapConnectionFactory;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 
+public class DirectoryConnection {
 
-public class Connection {
     HashMap<String, String> properties;
     LdapConnection connection;
-    SchemaBrowser schemaBrowser;
-    
-    public Connection(String url) throws Exception {
-		this.properties = new HashMap<>();
+    SchemaExplorer schemaExplorer;
+    DirectoryExplorer directoryExplorer;
 
-		String[] parts = url.split("/|:|@");
+    public DirectoryConnection(String url) throws Exception {
+        this.properties = new HashMap<>();
+
+        String[] parts = url.split("/|:|@");
 
         if (parts.length == 7) {
             this.properties.put("protocol", parts[0]);
@@ -29,21 +30,22 @@ public class Connection {
 
     }
 
-    Connection connect() throws Exception {
+    DirectoryConnection connect() throws Exception {
         LdapConnectionConfig config = new LdapConnectionConfig();
 
-        config.setLdapHost( this.properties.get("host") );
-        config.setLdapPort( Integer.parseInt(this.properties.get("port" )));
-        config.setName( this.properties.get("username" ));
-        config.setCredentials( this.properties.get("password") );
+        config.setLdapHost(this.properties.get("host"));
+        config.setLdapPort(Integer.parseInt(this.properties.get("port")));
+        config.setName(this.properties.get("username"));
+        config.setCredentials(this.properties.get("password"));
 
-         DefaultLdapConnectionFactory factory = new DefaultLdapConnectionFactory( config );
-        
-         factory.setTimeOut( 10000 );
+        DefaultLdapConnectionFactory factory = new DefaultLdapConnectionFactory(config);
+
+        factory.setTimeOut(10000);
 
         this.connection = factory.newLdapConnection();
 
-        this.schemaBrowser = new SchemaBrowser(this.connection);
+        this.schemaExplorer = new SchemaExplorer(this);
+        this.directoryExplorer = new DirectoryExplorer(this);
 
         return this;
     }
@@ -52,11 +54,13 @@ public class Connection {
         return this.connection;
     }
 
-
-    SchemaBrowser getSchemaBrowser() {
-        return this.schemaBrowser;
+    SchemaExplorer getSchemaExplorer() {
+        return this.schemaExplorer;
     }
 
+    DirectoryExplorer getDirectoryExplorer() {
+        return this.directoryExplorer;
+    }
 
     public void close() throws Exception {
 

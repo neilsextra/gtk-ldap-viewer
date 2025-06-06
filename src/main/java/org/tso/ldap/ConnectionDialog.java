@@ -14,13 +14,13 @@ public class ConnectionDialog {
     @FunctionalInterface
     interface Callback {
 
-        void onConnection(Connection connection);
+        void onConnection(DirectoryConnection connection);
 
     }
    
     Window window;
     GtkBuilder builder;
-    Connection connection = null;
+    DirectoryConnection connection = null;
 
     ConnectionDialog(Window parent, final String definition, Callback callback) throws Exception {
 
@@ -41,7 +41,7 @@ public class ConnectionDialog {
             EntryBuffer buffer = connectionUrl.getBuffer();
 
             try {
-                connection = new Connection(buffer.getText());
+                connection = new DirectoryConnection(buffer.getText());
 
                 ConnectionDialog.this.connection.connect();
 

@@ -1,9 +1,9 @@
 package org.tso.ldap;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Vector;
 
-import org.apache.directory.api.ldap.model.entry.Attribute;
-import org.apache.directory.api.ldap.model.entry.Entry;
 import org.gnome.gio.ApplicationFlags;
 import org.gnome.gio.ListStore;
 import org.gnome.glib.Type;
@@ -40,8 +40,8 @@ public class Navigator {
     ListView listView;
     ColumnView columnView;
     SearchEntry searchEntry;
-    Connection connection = null;
-    ArrayList<Entry> entries = new ArrayList<Entry>();
+    DirectoryConnection connection = null;
+    ArrayList<String> entries = new ArrayList<String>();
     ListIndexModel listIndexModel;
     
     public static final class Row extends GObject {
@@ -85,15 +85,17 @@ public class Navigator {
 
     }
 
-    void buildRows(Entry entry) {
+    void buildRows(String dn) {
 
-        for (Attribute attribute : entry.getAttributes()) {
+        var attributes = this.connection.getDirectoryExplorer().retrieve(dn);
 
-            Row row = new Row(attribute.getAttributeType().getName(), 
-                              attribute.getAttributeType().getOid(),
-                              attribute.getAttributeType().getSyntaxOid(),
-                              attribute.get().isHumanReadable() ? "String" : "Binary",
-                              attribute.get().isHumanReadable() ? attribute.get().getString() : attribute.get().getEscaped());
+        for (var attribute  : attributes) {
+
+            Row row = new Row(attribute.get("name"), 
+                              attribute.get("oid"),
+                              attribute.get("syntaxOid"),
+                              attribute.get("type"),
+                              attribute.get("value"));
 
             this.store.add(0, row);
 
@@ -113,7 +115,6 @@ public class Navigator {
                             "<b>Class:</b>" + row.getName() + "\n" + 
                             "<b>OID:</b>" + row.getOid() + "\n" +
                             "<b>Syntax:</b>" + row.getSyntax() + "\n" +
-                            connection.getSchemaBrowser().getType( row.getSyntax()) + "\n\n" +
                             "<span weight=\"ultraheavy\"  size=\"x-large\">Value</span>" + "\n" + 
                             row.getValue();
         
@@ -226,9 +227,9 @@ public class Navigator {
 
             int index = item.getIndex();
             
-            Entry entry = entries.get(index);
+            String entry = entries.get(index);
             
-            label.setLabel(entry.getDn().toString());
+            label.setLabel(entry);
 
         });
 
@@ -241,7 +242,7 @@ public class Navigator {
             
             int selected = ((SingleSelection<?>)(listView.getModel())).getSelected();
             
-            Entry entry = entries.get(selected);
+            String entry = entries.get(selected);
             
             Navigator.this.buildRows(entry);
 
@@ -264,9 +265,8 @@ public class Navigator {
             entries.clear();
             listIndexModel.setSize(entries.size());
 
-            Search search = new Search(this.connection);
-
-            search.search(searchEntry.getText(), entries);
+   
+            this.connection.getDirectoryExplorer().search(searchEntry.getText());
 
             listIndexModel.setSize(entries.size());
 
@@ -294,8 +294,8 @@ public class Navigator {
             aboutToolbarItem.onClicked(this::about);
             
             connectionDialog = new ConnectionDialog(mainWindow, "/org/tso/ldap/open-dialog.ui",
-                connection -> {        
-                    Navigator.this.connection = connection;
+                directoryConnection -> {        
+                    Navigator.this.connection = directoryConnection;
                     Navigator.this.searchEntry.setEditable(true);
                     
                     entries.clear();

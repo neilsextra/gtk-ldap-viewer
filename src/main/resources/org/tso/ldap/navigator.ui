@@ -124,19 +124,34 @@
             </child>
           </object>
         </child>
-
-        <child>
-          <object class="GtkLabel" id="statusBar">
-            <property name="hexpand">1</property>
-            <property name="margin_top">2</property>
-            <property name="margin_bottom">2</property>
-            <property name="label">LDAP Navigator - V0.0.1 - The Sour Orange</property>
+       <child>
+          <object class="GtkBox" id="vbox2">
             <layout>
               <property name="column">0</property>
               <property name="row">2</property>
               <property name="row-span">1</property>
-              <property name="column-span">1</property>
+              <property name="column-span">4</property>
             </layout>
+            <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+            <property name="hexpand">1</property>
+            <child>
+              <object class="GtkLabel" id="statusBar">
+                <property name="hexpand">1</property>
+                <property name="margin_start">14</property>
+                <property name="margin_top">2</property>
+                <property name="margin_bottom">2</property>
+                <property name="label"></property>
+                <property name="halign">GTK_ALIGN_START</property>
+              </object>
+            </child>
+           <child>
+              <object class="GtkProgressBar" id="progressBar">
+                <property name="margin_end">14</property>
+                <property name="margin_top">9</property>
+                <property name="margin_bottom">2</property>
+                <property name="visible">false</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
