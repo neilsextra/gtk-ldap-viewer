@@ -58,6 +58,43 @@ public class GuiUtils {
         return values;
     }
 
+
+     static final public String formatHex(String[] hexString) {
+        StringBuffer buffer = new StringBuffer();
+
+        char[] hex = hexString[0].toCharArray();
+        char[] ascii = hexString[1].toCharArray();
+
+        int iHex = 0;
+        int iChar = 0;
+
+        while (iChar < ascii.length) {
+            int iPos = 0;
+
+            for (iPos = 0; iHex < hex.length && iPos < 8; iHex += 2, iPos += 1) {
+                buffer.append(hex[iHex]);
+                buffer.append(hex[iHex + 1]);
+                buffer.append(" ");
+            }
+
+            if (iPos < 8) {
+                for (; iPos < 8; iPos++) {
+                    buffer.append("   ");
+                }
+            }
+
+            buffer.append("| ");
+
+            iPos = 0;
+
+            for (; iChar < ascii.length && (iPos < 8); iChar++, iPos += 1) {
+                buffer.append(ascii[iChar]);
+            }
+        }
+
+        return buffer.toString();
+     }
+    
      static final public SignalListItemFactory createSignalListItemFactory() {
 
         var columnFactory = new SignalListItemFactory();
