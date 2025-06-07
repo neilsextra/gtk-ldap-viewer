@@ -3,6 +3,7 @@ package org.tso.ldap.util;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.gnome.gtk.Inscription;
 import org.gnome.gtk.ListItem;
@@ -10,7 +11,6 @@ import org.gnome.gtk.SignalListItemFactory;
 import org.tso.ldap.Navigator;
 
 public class GuiUtils {
-    private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
 
     static final public String getDefintion(String definition) throws Exception {
         InputStream inputStream = Navigator.class.
@@ -28,74 +28,69 @@ public class GuiUtils {
 
     }
 
-    static final public ArrayList<Object> asHex(byte[] buf) {
+    static final String hexToChar(String hex) {
 
-        var values = new ArrayList<Object>(2);
+        int result = Integer.parseInt(hex, 16);
 
-        StringBuffer asciiChars = new StringBuffer();
+        var output = (result >= 32 && result <= 127) ? Character.toChars(result) : '.';
 
-        String[] hex = new String[16];
+        return output.toString();
 
-        for (int iHex = 0; iHex < hex.length; iHex++) {
-            hex[iHex] = "";
-        }
-
-        for (int i = 0, c = 0; i < buf.length; i++, c++) {
-            char[] chars = new char[2];
-
-            chars[0] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
-            chars[1] = HEX_CHARS[buf[i] & 0x0F];
-
-            hex[c] = new String(chars);
-
-            asciiChars.append(Character.isLetterOrDigit(buf[i]) ? (char) buf[i] : '.');
-
-        }
-
-        values.add(hex);
-        values.add(asciiChars);
-
-        return values;
     }
 
+    static final public String formatHex(String value) {
+        String output = "";
 
-     static final public String formatHex(String[] hexString) {
-        StringBuffer buffer = new StringBuffer();
+        List<String> hex = new ArrayList<>();
 
-        char[] hex = hexString[0].toCharArray();
-        char[] ascii = hexString[1].toCharArray();
+        for (var iChar = 0; iChar < value.length(); iChar += 2) {
 
-        int iHex = 0;
-        int iChar = 0;
+            hex.add(value.substring(iChar, iChar + 2));
 
-        while (iChar < ascii.length) {
-            int iPos = 0;
-
-            for (iPos = 0; iHex < hex.length && iPos < 8; iHex += 2, iPos += 1) {
-                buffer.append(hex[iHex]);
-                buffer.append(hex[iHex + 1]);
-                buffer.append(" ");
-            }
-
-            if (iPos < 8) {
-                for (; iPos < 8; iPos++) {
-                    buffer.append("   ");
-                }
-            }
-
-            buffer.append("| ");
-
-            iPos = 0;
-
-            for (; iChar < ascii.length && (iPos < 8); iChar++, iPos += 1) {
-                buffer.append(ascii[iChar]);
-            }
         }
 
-        return buffer.toString();
-     }
-    
-     static final public SignalListItemFactory createSignalListItemFactory() {
+        var hexValues = "";
+        var charValues = "";
+
+        var iHex = 0;
+        var iPos = 0;
+
+        for (; iHex < hex.size(); iHex++) {
+
+            iPos += 1;
+
+            hexValues += " " + hex.get(iHex) + " | ";
+            charValues += hexToChar(hex.get(iHex));
+
+            if (iPos % 16 == 0) {
+                output += hexValues;
+                output += charValues;
+                output += "\n";
+
+                hexValues = "";
+                charValues = "";
+            }
+
+            if (iHex % 16 != 0) {
+                output += hexValues;
+
+                for (var iCount = 0; iPos % 16 != 0; iPos++, iCount++) {
+
+                    output += "  | ";
+                }
+
+                output += charValues;
+
+                output += "\n";
+            }
+
+        }
+
+        return output;
+
+    }
+
+    static final public SignalListItemFactory createSignalListItemFactory() {
 
         var columnFactory = new SignalListItemFactory();
 
