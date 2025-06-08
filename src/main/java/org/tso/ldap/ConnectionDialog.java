@@ -5,9 +5,10 @@ import org.gnome.gtk.Button;
 import org.gnome.gtk.Entry;
 import org.gnome.gtk.EntryBuffer;
 import org.gnome.gtk.GtkBuilder;
+import org.gnome.gtk.ProgressBar;
 import org.gnome.gtk.Window;
 import org.tso.ldap.util.GuiUtils;
-
+import org.tso.ldap.util.ThreadMonitor;
 
 public class ConnectionDialog {
 
@@ -17,10 +18,11 @@ public class ConnectionDialog {
         void onConnection(DirectoryConnection connection);
 
     }
-   
+
     Window window;
     GtkBuilder builder;
     DirectoryConnection connection = null;
+    ProgressBar progressBar;
 
     ConnectionDialog(Window parent, final String definition, Callback callback) throws Exception {
 
@@ -31,6 +33,7 @@ public class ConnectionDialog {
         builder.addFromString(uiDefinition, uiDefinition.length());
 
         this.window = (Window) builder.getObject("openDialog");
+        this.progressBar = (ProgressBar) builder.getObject("progressBar");
 
         this.window.setParent(parent);
 
@@ -43,23 +46,36 @@ public class ConnectionDialog {
             try {
                 connection = new DirectoryConnection(buffer.getText());
 
-                ConnectionDialog.this.connection.connect();
+                ThreadMonitor monitor = new ThreadMonitor(connection, progressBar);
 
-                System.out.println("Connection Successful");
+                monitor.process(() -> {
 
-                callback.onConnection(connection);
+                    System.out.println("Connection Successful");
 
-                window.close();
+                    callback.onConnection(connection);
+
+                    if (connection.getConnectionException() != null) {
+                        AlertDialog.builder()
+                                .setModal(true)
+                                .setMessage("Connection")
+                                .setDetail(connection.getConnectionException().getMessage())
+                                .build()
+                                .show(ConnectionDialog.this.window);
+                    } else {
+                        window.close();
+                    }
+
+                });
 
             } catch (Exception e) {
-               AlertDialog.builder()
+                AlertDialog.builder()
                         .setModal(true)
                         .setMessage("Connection")
                         .setDetail(e.getMessage())
                         .build()
-                        .show(ConnectionDialog.this.window); 
+                        .show(ConnectionDialog.this.window);
             }
-        
+
         });
 
         var closeButton = (Button) builder.getObject("button_cancel");

@@ -7,6 +7,7 @@ import org.gnome.gio.ApplicationFlags;
 import org.gnome.gio.ListStore;
 import org.gnome.glib.Type;
 import org.gnome.gobject.GObject;
+import org.gnome.gtk.AlertDialog;
 import org.gnome.gtk.Align;
 import org.gnome.gtk.Application;
 import org.gnome.gtk.Button;
@@ -17,6 +18,7 @@ import org.gnome.gtk.Inscription;
 import org.gnome.gtk.Label;
 import org.gnome.gtk.ListItem;
 import org.gnome.gtk.ListView;
+import org.gnome.gtk.ProgressBar;
 import org.gnome.gtk.SearchEntry;
 import org.gnome.gtk.SelectionModel;
 import org.gnome.gtk.SignalListItemFactory;
@@ -26,14 +28,58 @@ import org.gnome.gtk.TextIter;
 import org.gnome.gtk.TextView;
 import org.gnome.gtk.Window;
 import org.tso.ldap.util.GuiUtils;
+import org.tso.ldap.util.ThreadMonitor;
 
 import io.github.jwharm.javagi.gio.ListIndexModel;
 import io.github.jwharm.javagi.gobject.types.Types;
 
 public class Navigator {
 
+    class SearchResult {
+
+        @FunctionalInterface
+        interface SearchResultCallback {
+
+            void onCompletion(List<String> result);
+
+        }
+        Window window;
+        List<String> results = null;
+        DirectoryConnection connection;
+
+        SearchResult(Window window, DirectoryConnection connection) {
+            this.window = window;
+            this.connection = connection;
+        }
+
+        void process(final SearchResultCallback searchCallback) {
+            ThreadMonitor monitor = new ThreadMonitor(() -> {
+                try {
+
+                    results = this.connection.getDirectoryExplorer().search(searchEntry.getText());
+
+                } catch (Exception e) {
+                    AlertDialog.builder()
+                            .setModal(true)
+                            .setMessage("Connection")
+                            .setDetail(connection.getConnectionException().getMessage())
+                            .build()
+                            .show(this.window);
+                }
+
+            }, progressBar);
+
+            monitor.process(() -> {
+                searchCallback.onCompletion(results);
+            });
+
+        }
+
+    }
+
     Window mainWindow;
     TextView attributeViewer;
+    ProgressBar progressBar;
     ConnectionDialog connectionDialog;
     AboutDialog aboutDialog;
     ListStore<Row> store;
@@ -41,7 +87,7 @@ public class Navigator {
     ColumnView columnView;
     SearchEntry searchEntry;
     DirectoryConnection connection = null;
-    List<String> entries = new ArrayList<String>();
+    List<String> entries = new ArrayList<>();
     ListIndexModel listIndexModel;
 
     public static final class Row extends GObject {
@@ -132,6 +178,7 @@ public class Navigator {
             var listitem = (ListItem) item;
             var inscription = (Inscription) listitem.getChild();
             var row = (Row) listitem.getItem();
+
             inscription.setText(row.getName());
 
         });
@@ -141,8 +188,8 @@ public class Navigator {
         columnFactoryOid.onBind(item -> {
             var listitem = (ListItem) item;
             var inscription = (Inscription) listitem.getChild();
-
             var row = (Row) listitem.getItem();
+
             inscription.setText(row.getOid());
 
         });
@@ -250,6 +297,7 @@ public class Navigator {
             Navigator.this.buildRows(entry);
 
             Navigator.this.selectRow(0);
+
         });
 
     }
@@ -263,19 +311,18 @@ public class Navigator {
     }
 
     void search() {
+        entries.clear();
+        listIndexModel.setSize(0);
 
-        try {
-            entries.clear();
+        new SearchResult(mainWindow, connection).process(
+            (results) -> {
+                Navigator.this.entries = results;
 
-            listIndexModel.setSize(entries.size());
+                listIndexModel.setSize(entries.size());
+                progressBar.setVisible(true);
 
-            entries = this.connection.getDirectoryExplorer().search(searchEntry.getText());
-
-            listIndexModel.setSize(entries.size());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            }
+        );
 
     }
 
@@ -288,6 +335,7 @@ public class Navigator {
             builder.addFromString(uiDefinition, uiDefinition.length());
 
             mainWindow = (Window) builder.getObject("main");
+            progressBar = (ProgressBar) builder.getObject("progressBar");
             attributeViewer = (TextView) builder.getObject("attributeViewer");
 
             var openToolbarButton = (Button) builder.getObject("openToolbarButton");
@@ -297,14 +345,14 @@ public class Navigator {
             aboutToolbarItem.onClicked(this::about);
 
             connectionDialog = new ConnectionDialog(mainWindow, "/org/tso/ldap/open-dialog.ui",
-                    directoryConnection -> {
-                        Navigator.this.connection = directoryConnection;
-                        Navigator.this.searchEntry.setEditable(true);
+                directoryConnection -> {
+                    Navigator.this.connection = directoryConnection;
+                    Navigator.this.searchEntry.setEditable(true);
 
-                        entries.clear();
-                        listIndexModel.setSize(entries.size());
+                    entries.clear();
+                    listIndexModel.setSize(entries.size());
 
-                    }
+                }
             );
 
             aboutDialog = new AboutDialog(mainWindow, "/org/tso/ldap/about-dialog.ui");

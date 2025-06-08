@@ -6,12 +6,13 @@ import org.apache.directory.ldap.client.api.DefaultLdapConnectionFactory;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 
-public class DirectoryConnection {
-
+public class DirectoryConnection implements Runnable {
     HashMap<String, String> properties;
     LdapConnection connection;
     SchemaExplorer schemaExplorer;
     DirectoryExplorer directoryExplorer;
+    Exception connectionException; 
+
 
     public DirectoryConnection(String url) throws Exception {
         this.properties = new HashMap<>();
@@ -30,24 +31,33 @@ public class DirectoryConnection {
 
     }
 
-    DirectoryConnection connect() throws Exception {
-        LdapConnectionConfig config = new LdapConnectionConfig();
+    private void connect() {
+        this.connectionException = null;
+        try {
+            LdapConnectionConfig config = new LdapConnectionConfig();
 
-        config.setLdapHost(this.properties.get("host"));
-        config.setLdapPort(Integer.parseInt(this.properties.get("port")));
-        config.setName(this.properties.get("username"));
-        config.setCredentials(this.properties.get("password"));
+            config.setLdapHost(this.properties.get("host"));
+            config.setLdapPort(Integer.parseInt(this.properties.get("port")));
+            config.setName(this.properties.get("username"));
+            config.setCredentials(this.properties.get("password"));
 
-        DefaultLdapConnectionFactory factory = new DefaultLdapConnectionFactory(config);
+            DefaultLdapConnectionFactory factory = new DefaultLdapConnectionFactory(config);
 
-        factory.setTimeOut(10000);
+            factory.setTimeOut(10000);
 
-        this.connection = factory.newLdapConnection();
+            this.connection = factory.newLdapConnection();
 
-        this.schemaExplorer = new SchemaExplorer(this);
-        this.directoryExplorer = new DirectoryExplorer(this);
+            this.schemaExplorer = new SchemaExplorer(this);
+            this.directoryExplorer = new DirectoryExplorer(this);
 
-        return this;
+        } catch (Exception exception) {
+            connectionException = exception;
+        }
+
+    }
+
+    Exception getConnectionException() {
+        return connectionException;
     }
 
     LdapConnection getLdapConnection() {
@@ -65,6 +75,15 @@ public class DirectoryConnection {
     public void close() throws Exception {
 
         this.connection.close();
+    }
+
+    @Override
+    public void run() {
+        try {
+            this.connect();
+        } catch (Exception e) {
+           
+        }
     }
 
 }
