@@ -41,18 +41,11 @@
             </layout>
             <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
             <property name="hexpand">1</property>
-             <child>
-              <object class="GtkProgressBar" id="progressBar">
-                <property name="margin_start">10</property>
-                <property name="margin_top">20</property>
-                <property name="visible">true</property>
-              </object>
-            </child>
-            <child type="action">
+           <child type="action">
               <object class="GtkButton" id="button_ok">
                 <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="margin_start">220</property>
+                <property name="margin_bottom">5</property>
+                <property name="margin_start">320</property>
                 <property name="margin_end">0</property>            
                 <property name="icon-name">object-select-symbolic</property>
               </object>
@@ -60,7 +53,7 @@
             <child type="action">
               <object class="GtkButton" id="button_cancel">
                 <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
+                <property name="margin_bottom">5</property>
                 <property name="margin_start">5</property>
                 <property name="margin_end">14</property>            
                 <property name="icon-name">window-close-symbolic</property>
@@ -68,6 +61,28 @@
             </child>
           </object>
         </child>
+        <child>
+          <object class="GtkBox" id="vbox3">
+            <property name="hexpand">1</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">2</property>
+               <property name="column-span">1</property>
+            </layout>
+            <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+            <property name="hexpand">1</property>
+             <child>
+              <object class="GtkProgressBar" id="progressBar">
+                <property name="margin_start">10</property>
+                <property name="margin_end">2</property>
+                <property name="margin_top">0</property>
+                <property name="margin_bottom">2</property>
+                <property name="width_request">390</property>
+                <property name="visible">true</property>
+              </object>
+            </child>
+            </object>
+          </child>
       </object>
     </child>
   </object>

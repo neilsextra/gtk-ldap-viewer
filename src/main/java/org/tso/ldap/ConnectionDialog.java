@@ -51,7 +51,8 @@ public class ConnectionDialog {
                 monitor.process(() -> {
 
                     System.out.println("Connection Successful");
-
+                    
+                    this.progressBar.setFraction(0);
                     callback.onConnection(connection);
 
                     if (connection.getConnectionException() != null) {
@@ -85,9 +86,7 @@ public class ConnectionDialog {
     }
 
     void show() {
-
         this.window.setVisible(true);
-
     }
 
 }

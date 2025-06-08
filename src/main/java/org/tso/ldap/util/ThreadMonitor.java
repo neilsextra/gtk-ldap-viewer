@@ -14,7 +14,6 @@ public class ThreadMonitor {
 
     Thread thread;
     ProgressBar progressBar;
-    CompletionCallback callback;
 
     public ThreadMonitor(Runnable runnable, ProgressBar progressBar) {
 
@@ -26,14 +25,11 @@ public class ThreadMonitor {
         thread.start();
 
         this.progressBar.setVisible(true);
-        this.progressBar.setFraction(0);
 
         GLib.timeoutAdd(GLib.PRIORITY_DEFAULT, 100, () -> {
 
             if (!thread.isAlive()) {
-                progressBar.setVisible(true);
                 callback.onCompletion();
-
             } else {
                 progressBar.pulse();
             }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <object class="GtkWindow" id="main">
+  <object class="GtkApplicationWindow" id="main">
     <property name="default-width">1320</property>
     <property name="default-height">750</property>
     <property name="visible">true</property>
