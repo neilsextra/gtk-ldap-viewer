@@ -177,11 +177,12 @@ public class Navigator {
 
     void buildRows(String dn) {
 
-        GuiUtils.clearTextView(attributeViewer);
-
         new RetrieveResult(mainWindow, connection).process((attributes)
                 -> {
-     
+            
+            GuiUtils.clearTextView(attributeViewer);
+            Navigator.this.store.clear();   
+
             for (var attribute : attributes) {
 
                 Row row = new Row(attribute.get("name"),
@@ -341,7 +342,6 @@ public class Navigator {
         listView.setFactory(factory);
 
         ((SingleSelection<?>) (listView.getModel())).onSelectionChanged((int position, int nItems) -> {
-            Navigator.this.store.removeAll();
 
             int selected = ((SingleSelection<?>) (listView.getModel())).getSelected();
 
@@ -368,6 +368,7 @@ public class Navigator {
         new SearchResult(mainWindow, connection).process(
             (results) -> {
                 Navigator.this.entries = results;
+                Navigator.this.store.removeAll();
 
                 listIndexModel.setSize(entries.size());
                 progressBar.setVisible(false);
