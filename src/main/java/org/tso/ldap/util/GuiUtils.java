@@ -8,6 +8,9 @@ import java.util.List;
 import org.gnome.gtk.Inscription;
 import org.gnome.gtk.ListItem;
 import org.gnome.gtk.SignalListItemFactory;
+import org.gnome.gtk.TextBuffer;
+import org.gnome.gtk.TextIter;
+import org.gnome.gtk.TextView;
 import org.tso.ldap.Navigator;
 
 public class GuiUtils {
@@ -105,6 +108,16 @@ public class GuiUtils {
 
         return columnFactory;
 
+    }
+
+    static final public void clearTextView(TextView textView) {
+        TextBuffer buffer = new TextBuffer();
+        TextIter iter = new TextIter();
+
+        buffer.getStartIter(iter);
+        buffer.insertMarkup(iter, "", -1);
+
+        textView.setBuffer(buffer);
     }
 
 }

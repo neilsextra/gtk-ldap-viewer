@@ -2,6 +2,7 @@ package org.tso.ldap;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.gnome.gio.ApplicationFlags;
 import org.gnome.gio.ListStore;
@@ -77,6 +78,49 @@ public class Navigator {
 
     }
 
+    class RetrieveResult {
+
+        @FunctionalInterface
+        interface RetrieveResultCallback {
+
+            void onCompletion(List<Map<String, String>> results);
+
+        }
+        Window window;
+        List<String> results = null;
+        DirectoryConnection connection;
+        List<Map<String, String>> attributes;
+
+        RetrieveResult(Window window, DirectoryConnection connection) {
+            this.window = window;
+            this.connection = connection;
+        }
+
+        void process(final RetrieveResultCallback retrieveCallback, String dn) {
+            ThreadMonitor monitor = new ThreadMonitor(() -> {
+                try {
+
+                    RetrieveResult.this.attributes = this.connection.getDirectoryExplorer().retrieve(dn);
+
+                } catch (Exception e) {
+                    AlertDialog.builder()
+                            .setModal(true)
+                            .setMessage("Connection")
+                            .setDetail(connection.getConnectionException().getMessage())
+                            .build()
+                            .show(this.window);
+                }
+
+            }, progressBar);
+
+            monitor.process(() -> {
+                retrieveCallback.onCompletion(RetrieveResult.this.attributes);
+            });
+
+        }
+
+    }
+
     Window mainWindow;
     TextView attributeViewer;
     ProgressBar progressBar;
@@ -133,19 +177,28 @@ public class Navigator {
 
     void buildRows(String dn) {
 
-        var attributes = this.connection.getDirectoryExplorer().retrieve(dn);
+        GuiUtils.clearTextView(attributeViewer);
 
-        for (var attribute : attributes) {
+        new RetrieveResult(mainWindow, connection).process((attributes)
+                -> {
+     
+            for (var attribute : attributes) {
 
-            Row row = new Row(attribute.get("name"),
-                    attribute.get("oid"),
-                    attribute.get("syntaxOid"),
-                    attribute.get("type"),
-                    attribute.get("value"));
+                Row row = new Row(attribute.get("name"),
+                        attribute.get("oid"),
+                        attribute.get("syntaxOid"),
+                        attribute.get("type"),
+                        attribute.get("value"));
 
-            this.store.add(0, row);
+                Navigator.this.store.add(0, row);
 
-        }
+            }
+            
+            progressBar.setVisible(false);
+            
+            Navigator.this.selectRow(0);
+
+        }, dn);
 
     }
 
@@ -296,8 +349,6 @@ public class Navigator {
 
             Navigator.this.buildRows(entry);
 
-            Navigator.this.selectRow(0);
-
         });
 
     }
@@ -319,7 +370,10 @@ public class Navigator {
                 Navigator.this.entries = results;
 
                 listIndexModel.setSize(entries.size());
-                progressBar.setVisible(true);
+                progressBar.setVisible(false);
+
+                Navigator.this.buildRows(entries.get(0));
+
 
             }
         );
@@ -345,14 +399,14 @@ public class Navigator {
             aboutToolbarItem.onClicked(this::about);
 
             connectionDialog = new ConnectionDialog(mainWindow, "/org/tso/ldap/open-dialog.ui",
-                directoryConnection -> {
-                    Navigator.this.connection = directoryConnection;
-                    Navigator.this.searchEntry.setEditable(true);
+                    directoryConnection -> {
+                        Navigator.this.connection = directoryConnection;
+                        Navigator.this.searchEntry.setEditable(true);
 
-                    entries.clear();
-                    listIndexModel.setSize(entries.size());
+                        entries.clear();
+                        listIndexModel.setSize(entries.size());
 
-                }
+                    }
             );
 
             aboutDialog = new AboutDialog(mainWindow, "/org/tso/ldap/about-dialog.ui");
