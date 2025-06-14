@@ -63,9 +63,10 @@ public class DirectoryExplorer {
 
     ResultContainer search(final String dn) throws Exception {
         var logger = LoggerFactory.getLogger(SchemaExplorer.class);
+
         List<String> entries = new ArrayList<>();
         final StringBuffer cursorPosition = new StringBuffer();
-       
+
         logger.info("Primary Search...");
 
         try (EntryCursor cursor = this.connection.getLdapConnection().search(dn, "(objectclass=*)", SearchScope.OBJECT)) {
@@ -116,7 +117,7 @@ public class DirectoryExplorer {
 
                 if (responseControl != null) {
                     cursorPosition.append(Base64.getEncoder().encodeToString(responseControl.getCookie()));
-                      logger.info("Captured Cursor position");
+                    logger.info("Captured Cursor position");
                 }
 
             }
@@ -129,7 +130,7 @@ public class DirectoryExplorer {
         }
 
         logger.info("Search Completed - Returning Results...");
-        
+
         return new ResultContainer() {
 
             @Override
@@ -151,8 +152,11 @@ public class DirectoryExplorer {
 
     }
 
-    List<String> next(String dn, String cursorPosition) throws Exception {
-        List<String> entries = new ArrayList<>();
+    ResultContainer next(String dn, String cursorPosition) throws Exception {
+        var logger = LoggerFactory.getLogger(SchemaExplorer.class);
+
+        final List<String> entries = new ArrayList<>();
+        final StringBuffer nextCursorPosition = new StringBuffer();
 
         PagedResultsImpl pageControl = new PagedResultsImpl();
         pageControl.setSize(4);
@@ -164,19 +168,55 @@ public class DirectoryExplorer {
         searchRequest.setScope(SearchScope.SUBTREE);
         searchRequest.addControl(pageControl);
 
-        EntryCursorImpl cursor = new EntryCursorImpl(this.connection.getLdapConnection().search(searchRequest));
+        try (SearchCursor cursor = this.connection.getLdapConnection().search(searchRequest)) {
 
-        while (cursor.next()) {
-            System.out.println("Second Pass User: " + cursor.get().getDn());
+            while (cursor.next()) {
+                Entry entry = cursor.getEntry();
+                System.out.println(entry.getDn().toString());
+
+                entries.add(entry.getDn().toString());
+            }
+
+            if (cursor.getSearchResultDone().getLdapResult().getResultCode() != ResultCodeEnum.SIZE_LIMIT_EXCEEDED) {
+
+                Map<String, Control> controls = cursor.getSearchResultDone().getControls();
+                PagedResults responseControl = (PagedResults) controls.get(PagedResults.OID);
+
+                if (responseControl != null) {
+                    nextCursorPosition.append(Base64.getEncoder().encodeToString(responseControl.getCookie()));
+                    logger.info("Captured Cursor position");
+                }
+
+            }
+
+            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
+        return new ResultContainer() {
 
-        cursor.close();
+            @Override
+            public List<String> getResults() {
+                return entries;
+            }
 
-        return entries;
+            @Override
+            public String getCursorPosition() {
+                return nextCursorPosition.toString();
+            }
+
+            @Override
+            public String getDn() {
+                return dn;
+            }
+
+        };
 
     }
 
-    List<Map<String, String>> retrieve(String dn) {
+    List<Map<String, String>> retrieve(String dn
+    ) {
         List<Map<String, String>> attributes = new ArrayList<Map<String, String>>();
         var logger = LoggerFactory.getLogger(DirectoryExplorer.class);
 

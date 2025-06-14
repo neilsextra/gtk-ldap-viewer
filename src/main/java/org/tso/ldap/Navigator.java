@@ -59,10 +59,62 @@ public class Navigator {
             ThreadMonitor monitor = new ThreadMonitor(() -> {
                 try {
 
-                   ResultContainer result = this.connection.getDirectoryExplorer().search(searchEntry.getText());
+                    ResultContainer result = this.connection.getDirectoryExplorer().search(searchEntry.getText());
 
-                   results.addAll(result.getResults());
-                   searchDn.setText(result.getDn());
+                    results.addAll(result.getResults());
+                    searchDn.setText(result.getDn());
+
+                } catch (Exception e) {
+                    System.out.println("Alert");
+
+                    AlertDialog.builder()
+                            .setModal(true)
+                            .setMessage("Search")
+                            .setDetail(e.getMessage())
+                            .build()
+                            .show(this.window);
+                }
+
+            }, progressBar);
+
+            monitor.process(() -> {
+                searchCallback.onCompletion(results);
+            });
+
+        }
+
+    }
+
+    class NextResult {
+
+        @FunctionalInterface
+        interface SearchResultCallback {
+
+            void onCompletion(List<String> result);
+
+        }
+
+        private Window window;
+        private  List<String> results = new ArrayList<>();
+        private DirectoryConnection connection;
+        private String dn;
+        private String cursorPosition;
+
+        NextResult(Window window, DirectoryConnection connection, String dn, String cursorPosition) {
+            this.window = window;
+            this.connection = connection;
+            this.dn = dn;
+            this.cursorPosition = cursorPosition;
+        }
+
+        void process(final SearchResultCallback searchCallback) {
+            ThreadMonitor monitor = new ThreadMonitor(() -> {
+                try {
+
+                    ResultContainer result = this.connection.getDirectoryExplorer().next(dn, cursorPosition);
+
+                    results.addAll(result.getResults());
+                    searchDn.setText(result.getDn());
 
                 } catch (Exception e) {
                     System.out.println("Alert");
@@ -187,9 +239,9 @@ public class Navigator {
 
         new RetrieveResult(mainWindow, connection).process((attributes)
                 -> {
-            
+
             GuiUtils.clearTextView(attributeViewer);
-            Navigator.this.store.clear();   
+            Navigator.this.store.clear();
 
             for (var attribute : attributes) {
 
@@ -202,9 +254,9 @@ public class Navigator {
                 Navigator.this.store.add(0, row);
 
             }
-            
+
             progressBar.setVisible(false);
-            
+
             Navigator.this.selectRow(0);
 
         }, dn);
@@ -374,17 +426,16 @@ public class Navigator {
         listIndexModel.setSize(0);
 
         new SearchResult(mainWindow, connection).process(
-            (results) -> {
-                Navigator.this.entries = results;
-                Navigator.this.store.removeAll();
+                (results) -> {
+                    Navigator.this.entries = results;
+                    Navigator.this.store.removeAll();
 
-                listIndexModel.setSize(Navigator.this.entries.size());
-                progressBar.setVisible(false);
+                    listIndexModel.setSize(Navigator.this.entries.size());
+                    progressBar.setVisible(false);
 
-                Navigator.this.buildRows(entries.get(0));
+                    Navigator.this.buildRows(entries.get(0));
 
-            }
-            
+                }
         );
 
     }
