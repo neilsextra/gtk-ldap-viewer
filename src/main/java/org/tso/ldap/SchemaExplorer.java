@@ -19,24 +19,27 @@ public class SchemaExplorer {
     public SchemaExplorer(DirectoryConnection connection) throws Exception {
 
         this.connection = connection;
-
+        System.out.println("Loading Schema");
         this.load();
 
     }
 
-    void load() {
+    private void load() {
         var logger = LoggerFactory.getLogger(SchemaExplorer.class);
 
         this.attributes = new HashMap<String, AttributeType>();
 
+        this.connection.getLdapConnection().setTimeOut(50000);
+
         try {
             DefaultSchemaLoader schemaLoader = new DefaultSchemaLoader(this.connection.getLdapConnection(), true);
 
+            schemaLoader.setQuirksMode(true);
             Collection<Schema> schemas = schemaLoader.getAllSchemas();
 
             for (Schema schema : schemas) {
 
-                logger.info("Schema: '" + schema.getSchemaName() + "' - loaded");
+                System.out.println("Schema: '" + schema.getSchemaName() + "' - loaded");
 
                 Set<SchemaObjectWrapper> content = schema.getContent();
 
@@ -53,6 +56,7 @@ public class SchemaExplorer {
             }
 
         } catch (Exception e) {
+            System.out.println(e);
             logger.error("Schema Loader Error", e);
         }
 
