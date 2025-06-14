@@ -28,6 +28,7 @@ import org.gnome.gtk.TextBuffer;
 import org.gnome.gtk.TextIter;
 import org.gnome.gtk.TextView;
 import org.gnome.gtk.Window;
+import org.tso.ldap.DirectoryExplorer.ResultContainer;
 import org.tso.ldap.util.GuiUtils;
 import org.tso.ldap.util.ThreadMonitor;
 
@@ -44,8 +45,9 @@ public class Navigator {
             void onCompletion(List<String> result);
 
         }
+
         Window window;
-        List<String> results = null;
+        List<String> results = new ArrayList<>();
         DirectoryConnection connection;
 
         SearchResult(Window window, DirectoryConnection connection) {
@@ -57,13 +59,18 @@ public class Navigator {
             ThreadMonitor monitor = new ThreadMonitor(() -> {
                 try {
 
-                    results = this.connection.getDirectoryExplorer().search(searchEntry.getText());
+                   ResultContainer result = this.connection.getDirectoryExplorer().search(searchEntry.getText());
+
+                   results.addAll(result.getResults());
+                   searchDn.setText(result.getDn());
 
                 } catch (Exception e) {
+                    System.out.println("Alert");
+
                     AlertDialog.builder()
                             .setModal(true)
-                            .setMessage("Connection")
-                            .setDetail(connection.getConnectionException().getMessage())
+                            .setMessage("Search")
+                            .setDetail(e.getMessage())
                             .build()
                             .show(this.window);
                 }
@@ -133,6 +140,7 @@ public class Navigator {
     DirectoryConnection connection = null;
     List<String> entries = new ArrayList<>();
     ListIndexModel listIndexModel;
+    Label searchDn;
 
     public static final class Row extends GObject {
 
@@ -370,13 +378,13 @@ public class Navigator {
                 Navigator.this.entries = results;
                 Navigator.this.store.removeAll();
 
-                listIndexModel.setSize(entries.size());
+                listIndexModel.setSize(Navigator.this.entries.size());
                 progressBar.setVisible(false);
 
                 Navigator.this.buildRows(entries.get(0));
 
-
             }
+            
         );
 
     }
@@ -392,6 +400,7 @@ public class Navigator {
             mainWindow = (Window) builder.getObject("main");
             progressBar = (ProgressBar) builder.getObject("progressBar");
             attributeViewer = (TextView) builder.getObject("attributeViewer");
+            searchDn = (Label) builder.getObject("searchDn");
 
             var openToolbarButton = (Button) builder.getObject("openToolbarButton");
             var aboutToolbarItem = (Button) builder.getObject("aboutToolbarItem");

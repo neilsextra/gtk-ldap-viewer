@@ -57,7 +57,7 @@
                     <property name="margin_start">14</property>
                     <property name="margin_end">14</property>
                     <property name="editable">false</property>
-                  </object> 
+                  </object>
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledWindow">
@@ -70,9 +70,43 @@
                     <property name="min_content_width">300</property>
                     <property name="hscrollbar-policy">GTK_POLICY_AUTOMATIC</property>
                     <property name="vscrollbar-policy">GTK_POLICY_AUTOMATIC</property>
-
                     <child>
                       <object class="GtkListView" id="selectionView">
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkFrame">
+                    <property name="margin_top">10</property>
+                    <property name="margin_start">12</property>
+                    <property name="margin_end">12</property>
+                    <child>
+                      <object class="GtkBox" id="vbox3">
+                        <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+                        <property name="hexpand">1</property>
+                        <child>
+                          <object class="GtkLabel" id="searchDn">
+                            <property name="hexpand">1</property>
+                            <property name="margin_start">10</property>
+                            <property name="label"></property>
+                            <property name="halign">GTK_ALIGN_START</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="firstPage">
+                            <property name="margin_start">10</property>
+                            <property name="has_frame">false</property>
+                            <property name="icon-name">zoom-original-symbolic</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="nextPage">
+                            <property name="has_frame">false</property>
+                            <property name="margin_end">10</property>
+                            <property name="icon-name">media-playback-start-symbolic</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -107,6 +141,7 @@
                     <property name="hexpand">1</property>
                     <property name="margin_end">14</property>
                     <property name="margin_top">10</property>
+                    <property name="margin_bottom">0</property>
                     <property name="min_content_height">200</property>
                     <property name="max_content_height">200</property>
                     <child>
@@ -124,7 +159,7 @@
             </child>
           </object>
         </child>
-       <child>
+        <child>
           <object class="GtkBox" id="vbox2">
             <layout>
               <property name="column">0</property>
@@ -144,7 +179,7 @@
                 <property name="halign">GTK_ALIGN_START</property>
               </object>
             </child>
-           <child>
+            <child>
               <object class="GtkProgressBar" id="progressBar">
                 <property name="margin_end">14</property>
                 <property name="margin_top">9</property>
