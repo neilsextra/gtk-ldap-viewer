@@ -67,16 +67,16 @@ public class Navigator {
                     searchDn.setText(result.getDn());
                     
                     Navigator.this.redoSearch.setSensitive(true);
+                    Navigator.this.expandEntry.setSensitive(!result.getResults().isEmpty());
 
                     if (result.getCursorPosition().length() > 0) {
                         System.out.println("Cursor Postion: " + result.getCursorPosition());
 
                         Navigator.this.currentCursor = result.getCursorPosition();
                         Navigator.this.nextPage.setSensitive(true);
-                        Navigator.this.expandEntry.setSensitive(true);
                         
                     } else {
-                        Navigator.this.expandEntry.setSensitive(false);
+                        Navigator.this.nextPage.setSensitive(false);
                     }
 
                 } catch (Exception e) {
@@ -132,16 +132,16 @@ public class Navigator {
                     searchDn.setText(result.getDn());
 
                     Navigator.this.redoSearch.setSensitive(true);
+                    Navigator.this.expandEntry.setSensitive(!result.getResults().isEmpty());
 
                     if (result.getCursorPosition().length() > 0) {
                         System.out.println("Cursor Postion: " + result.getCursorPosition());
 
                         Navigator.this.currentCursor = result.getCursorPosition();
                         Navigator.this.nextPage.setSensitive(true);
-                        Navigator.this.expandEntry.setSensitive(true);
-                        
+                       
                      } else {
-                        Navigator.this.expandEntry.setSensitive(false);
+                        Navigator.this.nextPage.setSensitive(false);
                     }
 
                 } catch (Exception e) {
@@ -515,10 +515,13 @@ public class Navigator {
         entries.clear();
         listIndexModel.setSize(0);
         
-        int selected = ((SingleSelection<?>) (columnView.getModel())).getSelected();
-        Row row = store.get(selected);
+        int selected = ((SingleSelection<?>) (listView.getModel())).getSelected();
 
-        new SearchResult(mainWindow, connection, row.name).process(
+        String entry = entries.get(selected);
+
+        System.out.println("Name: " + entry);
+
+        new SearchResult(mainWindow, connection, entry).process(
             (results) -> {
                 Navigator.this.entries = results;
                 Navigator.this.store.removeAll();
