@@ -60,7 +60,6 @@ public class Navigator {
         void process(final SearchResultCallback searchCallback) {
             ThreadMonitor monitor = new ThreadMonitor(() -> {
                 try {
-
                     ResultContainer result = this.connection.getDirectoryExplorer().search(base);
 
                     results.addAll(result.getResults());
@@ -512,15 +511,16 @@ public class Navigator {
     }
 
     void expand() {
-        entries.clear();
-        listIndexModel.setSize(0);
-        
+
         int selected = ((SingleSelection<?>) (listView.getModel())).getSelected();
 
         String entry = entries.get(selected);
 
         System.out.println("Name: " + entry);
-
+        
+        entries.clear();
+        listIndexModel.setSize(0);
+        
         new SearchResult(mainWindow, connection, entry).process(
             (results) -> {
                 Navigator.this.entries = results;
