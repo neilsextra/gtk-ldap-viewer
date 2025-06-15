@@ -49,20 +49,35 @@ public class Navigator {
         Window window;
         List<String> results = new ArrayList<>();
         DirectoryConnection connection;
+        String base;
 
-        SearchResult(Window window, DirectoryConnection connection) {
+        SearchResult(Window window, DirectoryConnection connection, String base) {
             this.window = window;
             this.connection = connection;
+            this.base = base;
         }
 
         void process(final SearchResultCallback searchCallback) {
             ThreadMonitor monitor = new ThreadMonitor(() -> {
                 try {
 
-                    ResultContainer result = this.connection.getDirectoryExplorer().search(searchEntry.getText());
+                    ResultContainer result = this.connection.getDirectoryExplorer().search(base);
 
                     results.addAll(result.getResults());
                     searchDn.setText(result.getDn());
+                    
+                    Navigator.this.redoSearch.setSensitive(true);
+
+                    if (result.getCursorPosition().length() > 0) {
+                        System.out.println("Cursor Postion: " + result.getCursorPosition());
+
+                        Navigator.this.currentCursor = result.getCursorPosition();
+                        Navigator.this.nextPage.setSensitive(true);
+                        Navigator.this.expandEntry.setSensitive(true);
+                        
+                    } else {
+                        Navigator.this.expandEntry.setSensitive(false);
+                    }
 
                 } catch (Exception e) {
                     System.out.println("Alert");
@@ -95,7 +110,7 @@ public class Navigator {
         }
 
         private Window window;
-        private  List<String> results = new ArrayList<>();
+        private List<String> results = new ArrayList<>();
         private DirectoryConnection connection;
         private String dn;
         private String cursorPosition;
@@ -115,6 +130,19 @@ public class Navigator {
 
                     results.addAll(result.getResults());
                     searchDn.setText(result.getDn());
+
+                    Navigator.this.redoSearch.setSensitive(true);
+
+                    if (result.getCursorPosition().length() > 0) {
+                        System.out.println("Cursor Postion: " + result.getCursorPosition());
+
+                        Navigator.this.currentCursor = result.getCursorPosition();
+                        Navigator.this.nextPage.setSensitive(true);
+                        Navigator.this.expandEntry.setSensitive(true);
+                        
+                     } else {
+                        Navigator.this.expandEntry.setSensitive(false);
+                    }
 
                 } catch (Exception e) {
                     System.out.println("Alert");
@@ -193,6 +221,10 @@ public class Navigator {
     List<String> entries = new ArrayList<>();
     ListIndexModel listIndexModel;
     Label searchDn;
+    String currentCursor;
+    Button redoSearch;
+    Button nextPage;
+    Button expandEntry;
 
     public static final class Row extends GObject {
 
@@ -425,21 +457,81 @@ public class Navigator {
         entries.clear();
         listIndexModel.setSize(0);
 
-        new SearchResult(mainWindow, connection).process(
-                (results) -> {
-                    Navigator.this.entries = results;
-                    Navigator.this.store.removeAll();
+        new SearchResult(mainWindow, connection, searchEntry.getText()).process(
+            (results) -> {
+                Navigator.this.entries = results;
+                Navigator.this.store.removeAll();
 
-                    listIndexModel.setSize(Navigator.this.entries.size());
-                    progressBar.setVisible(false);
+                listIndexModel.setSize(Navigator.this.entries.size());
+                progressBar.setVisible(false);
 
-                    Navigator.this.buildRows(entries.get(0));
+                Navigator.this.buildRows(entries.get(0));
 
-                }
+            }
         );
 
     }
 
+    void redo() {
+        entries.clear();
+        listIndexModel.setSize(0);
+
+        new SearchResult(mainWindow, connection, searchDn.getText()).process(
+            (results) -> {
+                Navigator.this.entries = results;
+                Navigator.this.store.removeAll();
+
+                listIndexModel.setSize(Navigator.this.entries.size());
+                progressBar.setVisible(false);
+
+                Navigator.this.buildRows(entries.get(0));
+
+            }
+        );
+
+    }
+   
+    void next() {
+        entries.clear();
+        listIndexModel.setSize(0);
+
+        new NextResult(mainWindow, connection, searchDn.getText(), currentCursor).process(
+            (results) -> {
+                Navigator.this.entries = results;
+                Navigator.this.store.removeAll();
+
+                listIndexModel.setSize(Navigator.this.entries.size());
+                progressBar.setVisible(false);
+
+                Navigator.this.buildRows(entries.get(0));
+
+            }
+            
+        );
+
+    }
+
+    void expand() {
+        entries.clear();
+        listIndexModel.setSize(0);
+        
+        int selected = ((SingleSelection<?>) (columnView.getModel())).getSelected();
+        Row row = store.get(selected);
+
+        new SearchResult(mainWindow, connection, row.name).process(
+            (results) -> {
+                Navigator.this.entries = results;
+                Navigator.this.store.removeAll();
+
+                listIndexModel.setSize(Navigator.this.entries.size());
+                progressBar.setVisible(false);
+
+                Navigator.this.buildRows(entries.get(0));
+
+            }
+        );
+
+    }
     public void activate(Application app) {
         GtkBuilder builder = new GtkBuilder();
 
@@ -452,6 +544,9 @@ public class Navigator {
             progressBar = (ProgressBar) builder.getObject("progressBar");
             attributeViewer = (TextView) builder.getObject("attributeViewer");
             searchDn = (Label) builder.getObject("searchDn");
+            redoSearch = (Button) builder.getObject("redoSearch");
+            nextPage = (Button) builder.getObject("nextPage");
+            expandEntry = (Button) builder.getObject("expandEntry");
 
             var openToolbarButton = (Button) builder.getObject("openToolbarButton");
             var aboutToolbarItem = (Button) builder.getObject("aboutToolbarItem");
@@ -482,6 +577,7 @@ public class Navigator {
             columnView.setModel(new SingleSelection<Row>(store));
 
             ((SingleSelection<?>) (columnView.getModel())).onSelectionChanged(new SelectionModel.SelectionChangedCallback() {
+                @Override
                 public void run(int position, int nItems) {
 
                     Navigator.this.selectRow(((SingleSelection<?>) (columnView.getModel())).getSelected());
@@ -496,6 +592,9 @@ public class Navigator {
             searchEntry = (SearchEntry) builder.getObject("search");
 
             searchEntry.onActivate(this::search);
+            redoSearch.onClicked(this::redo);
+            nextPage.onClicked(this::next);
+            expandEntry.onClicked(this::expand);
 
             mainWindow.setApplication(app);
 

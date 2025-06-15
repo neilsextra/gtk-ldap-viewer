@@ -94,16 +94,27 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkButton" id="firstPage">
+                        <object class="GtkButton" id="expandEntry">
                             <property name="margin_start">10</property>
                             <property name="has_frame">false</property>
-                            <property name="icon-name">zoom-original-symbolic</property>
+                            <property name="icon-name">system-search-symbolic</property>
+                            <property name="sensitive">false</property>
+
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="redoSearch">
+  =                           <property name="has_frame">false</property>
+                            <property name="icon-name">view-refresh</property>
+                            <property name="sensitive">false</property>
+
                           </object>
                         </child>
                         <child>
                           <object class="GtkButton" id="nextPage">
                             <property name="has_frame">false</property>
                             <property name="margin_end">10</property>
+                            <property name="sensitive">false</property>
                             <property name="icon-name">media-playback-start-symbolic</property>
                           </object>
                         </child>

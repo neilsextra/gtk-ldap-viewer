@@ -21,7 +21,7 @@ import org.apache.directory.api.ldap.model.message.controls.PagedResults;
 import org.apache.directory.api.ldap.model.message.controls.PagedResultsImpl;
 import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.api.ldap.model.schema.AttributeType;
-import org.apache.directory.ldap.client.api.EntryCursorImpl;
+
 import org.slf4j.LoggerFactory;
 
 public class DirectoryExplorer {
@@ -36,6 +36,7 @@ public class DirectoryExplorer {
     };
 
     DirectoryConnection connection;
+    final int MAX_RESULTS = 100;
 
     public DirectoryExplorer(DirectoryConnection connection) {
 
@@ -66,6 +67,7 @@ public class DirectoryExplorer {
 
         List<String> entries = new ArrayList<>();
         final StringBuffer cursorPosition = new StringBuffer();
+        var pageSize = MAX_RESULTS;
 
         logger.info("Primary Search...");
 
@@ -74,6 +76,7 @@ public class DirectoryExplorer {
             for (Entry entry : cursor) {
 
                 entries.add(entry.getDn().toString());
+                pageSize = pageSize - 1;
 
             }
 
@@ -88,7 +91,7 @@ public class DirectoryExplorer {
 
         PagedResults pagedControl = new PagedResultsImpl();
 
-        pagedControl.setSize(4);
+        pagedControl.setSize(pageSize);
 
         SearchRequest searchRequest = new SearchRequestImpl();
         searchRequest.setBase(new Dn(dn));
@@ -159,7 +162,7 @@ public class DirectoryExplorer {
         final StringBuffer nextCursorPosition = new StringBuffer();
 
         PagedResultsImpl pageControl = new PagedResultsImpl();
-        pageControl.setSize(4);
+        pageControl.setSize(MAX_RESULTS);
         pageControl.setCookie(Base64.getDecoder().decode(cursorPosition));
 
         SearchRequestImpl searchRequest = new SearchRequestImpl();
@@ -190,6 +193,7 @@ public class DirectoryExplorer {
             }
 
             cursor.close();
+
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
