@@ -22,12 +22,13 @@ public class DirectoryConnection implements Runnable {
         if (parts.length == 7) {
             this.properties.put("protocol", parts[0]);
             this.properties.put("username", parts[3]);
-            this.properties.put("password", parts[4]);
             this.properties.put("host", parts[5]);
             this.properties.put("port", parts[6]);
         } else {
             throw new Exception("Invalid URL");
         }
+        
+        this.properties.put("password", password);
 
     }
 

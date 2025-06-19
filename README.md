@@ -11,13 +11,14 @@ GTK Sample LDAP Viewer
 
 ## Example Connection String
 
-`ldap://<user-dn>:<password>@<hostname>:389`
+`ldap://<user-dn>@<hostname>:389`
 
 Example
 `ldap://cn=read-only-admin,dc=example,dc=com:@ldap.forumsys.com:389`
 
 ## Note:
 Password must be supplied separately within the password field.
+It is 'password' for this site.
 
 Queries
 `ou=mathematicians,dc=example,dc=com`
