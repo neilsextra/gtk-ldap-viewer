@@ -2,7 +2,7 @@
 <interface>
   <object class="GtkWindow" id="openDialog">
     <property name="default-width">400</property>
-    <property name="default-height">150</property>
+    <property name="default-height">200</property>
     <property name="visible">false</property>
     <property name="resizable">false</property>
     <property name="modal">true</property>
@@ -17,16 +17,25 @@
               <property name="row">0</property>
               <property name="column-span">1</property>
             </layout>
-            <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+            <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
             <property name="hexpand">1</property>
             <child>
               <object class="GtkEntry" id="connection">
-                <property name="placeholder_text">ldap://&lt;userid&gt;:&lt;password&gt;@&lt;host&gt;:&lt;port&gt;</property>
+                <property name="placeholder_text">ldap://&lt;userid&gt;@&lt;host&gt;:&lt;port&gt;</property>
                 <property name="hexpand">1</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="margin_start">14</property>
                 <property name="margin_end">14</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkPasswordEntry" id="password">
+                <property name="placeholder_text">&lt;password&gt;</property>
+                 <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="margin_start">14</property>
+                <property name="margin_end">200</property>
               </object>
             </child>
           </object>

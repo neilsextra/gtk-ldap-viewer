@@ -104,7 +104,7 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="redoSearch">
-  =                           <property name="has_frame">false</property>
+                            <property name="has_frame">false</property>
                             <property name="icon-name">view-refresh</property>
                             <property name="sensitive">false</property>
 

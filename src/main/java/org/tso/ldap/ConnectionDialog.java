@@ -5,6 +5,7 @@ import org.gnome.gtk.Button;
 import org.gnome.gtk.Entry;
 import org.gnome.gtk.EntryBuffer;
 import org.gnome.gtk.GtkBuilder;
+import org.gnome.gtk.PasswordEntry;
 import org.gnome.gtk.ProgressBar;
 import org.gnome.gtk.Window;
 import org.tso.ldap.util.GuiUtils;
@@ -39,12 +40,13 @@ public class ConnectionDialog {
 
         final var okButton = (Button) builder.getObject("button_ok");
         final var connectionUrl = (Entry) builder.getObject("connection");
+        final var password = (PasswordEntry) builder.getObject("password");
 
         okButton.onClicked(() -> {
             EntryBuffer buffer = connectionUrl.getBuffer();
 
             try {
-                connection = new DirectoryConnection(buffer.getText());
+                connection = new DirectoryConnection(buffer.getText(), password.getText());
 
                 ThreadMonitor monitor = new ThreadMonitor(connection, progressBar);
 

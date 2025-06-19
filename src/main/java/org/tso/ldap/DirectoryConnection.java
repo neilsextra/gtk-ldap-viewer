@@ -14,7 +14,7 @@ public class DirectoryConnection implements Runnable {
     Exception connectionException; 
 
 
-    public DirectoryConnection(String url) throws Exception {
+    public DirectoryConnection(String url, String password) throws Exception {
         this.properties = new HashMap<>();
 
         String[] parts = url.split("/|:|@");
