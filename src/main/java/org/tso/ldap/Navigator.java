@@ -64,7 +64,7 @@ public class Navigator {
 
                     results.addAll(result.getResults());
                     searchDn.setText(result.getDn());
-                    
+
                     Navigator.this.redoSearch.setSensitive(true);
                     Navigator.this.expandEntry.setSensitive(!result.getResults().isEmpty());
 
@@ -73,13 +73,13 @@ public class Navigator {
 
                         Navigator.this.currentCursor = result.getCursorPosition();
                         Navigator.this.nextPage.setSensitive(true);
-                        
+
                     } else {
                         Navigator.this.nextPage.setSensitive(false);
                     }
 
                 } catch (Exception e) {
- 
+
                     AlertDialog.builder()
                             .setModal(true)
                             .setMessage("Search")
@@ -137,8 +137,8 @@ public class Navigator {
 
                         Navigator.this.currentCursor = result.getCursorPosition();
                         Navigator.this.nextPage.setSensitive(true);
-                       
-                     } else {
+
+                    } else {
                         Navigator.this.nextPage.setSensitive(false);
                     }
 
@@ -456,16 +456,16 @@ public class Navigator {
         listIndexModel.setSize(0);
 
         new SearchResult(mainWindow, connection, searchEntry.getText()).process(
-            (results) -> {
-                Navigator.this.entries = results;
-                Navigator.this.store.removeAll();
+                (results) -> {
+                    Navigator.this.entries = results;
+                    Navigator.this.store.removeAll();
 
-                listIndexModel.setSize(Navigator.this.entries.size());
-                progressBar.setVisible(false);
+                    listIndexModel.setSize(Navigator.this.entries.size());
+                    progressBar.setVisible(false);
 
-                Navigator.this.buildRows(entries.get(0));
+                    Navigator.this.buildRows(entries.get(0));
 
-            }
+                }
         );
 
     }
@@ -475,65 +475,61 @@ public class Navigator {
         listIndexModel.setSize(0);
 
         new SearchResult(mainWindow, connection, searchDn.getText()).process(
-            (results) -> {
-                Navigator.this.entries = results;
-                Navigator.this.store.removeAll();
+                (results) -> {
+                    Navigator.this.entries = results;
+                    Navigator.this.store.removeAll();
 
-                listIndexModel.setSize(Navigator.this.entries.size());
-                progressBar.setVisible(false);
+                    listIndexModel.setSize(Navigator.this.entries.size());
+                    progressBar.setVisible(false);
 
-                Navigator.this.buildRows(entries.get(0));
+                    Navigator.this.buildRows(entries.get(0));
 
-            }
+                }
         );
 
     }
-   
+
     void next() {
         entries.clear();
         listIndexModel.setSize(0);
 
         new NextResult(mainWindow, connection, searchDn.getText(), currentCursor).process(
-            (results) -> {
-                Navigator.this.entries = results;
-                Navigator.this.store.removeAll();
+                (results) -> {
+                    Navigator.this.entries = results;
+                    Navigator.this.store.removeAll();
 
-                listIndexModel.setSize(Navigator.this.entries.size());
-                progressBar.setVisible(false);
+                    listIndexModel.setSize(Navigator.this.entries.size());
+                    progressBar.setVisible(false);
 
-                Navigator.this.buildRows(entries.get(0));
+                    Navigator.this.buildRows(entries.get(0));
 
-            }
-            
+                }
         );
 
     }
 
     void expand() {
-
         int selected = ((SingleSelection<?>) (listView.getModel())).getSelected();
-
         String entry = entries.get(selected);
 
-        System.out.println("Name: " + entry);
-        
         entries.clear();
         listIndexModel.setSize(0);
-        
+
         new SearchResult(mainWindow, connection, entry).process(
-            (results) -> {
-                Navigator.this.entries = results;
-                Navigator.this.store.removeAll();
+                (results) -> {
+                    Navigator.this.entries = results;
+                    Navigator.this.store.removeAll();
 
-                listIndexModel.setSize(Navigator.this.entries.size());
-                progressBar.setVisible(false);
+                    listIndexModel.setSize(Navigator.this.entries.size());
+                    progressBar.setVisible(false);
 
-                Navigator.this.buildRows(entries.get(0));
+                    Navigator.this.buildRows(entries.get(0));
 
-            }
+                }
         );
 
     }
+
     public void activate(Application app) {
         GtkBuilder builder = new GtkBuilder();
 
@@ -565,6 +561,8 @@ public class Navigator {
                         entries.clear();
                         Navigator.this.store.clear();
                         GuiUtils.clearTextView(attributeViewer);
+                        Navigator.this.redoSearch.setSensitive(false);
+                        Navigator.this.expandEntry.setSensitive(false);
 
                         listIndexModel.setSize(entries.size());
 
