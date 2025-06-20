@@ -563,6 +563,7 @@ public class Navigator {
                         GuiUtils.clearTextView(attributeViewer);
                         Navigator.this.redoSearch.setSensitive(false);
                         Navigator.this.expandEntry.setSensitive(false);
+                        Navigator.this.searchDn.setText("");
 
                         listIndexModel.setSize(entries.size());
 
