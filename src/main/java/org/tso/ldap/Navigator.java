@@ -79,8 +79,7 @@ public class Navigator {
                     }
 
                 } catch (Exception e) {
-                    System.out.println("Alert");
-
+ 
                     AlertDialog.builder()
                             .setModal(true)
                             .setMessage("Search")
@@ -559,10 +558,14 @@ public class Navigator {
 
             connectionDialog = new ConnectionDialog(mainWindow, "/org/tso/ldap/open-dialog.ui",
                     directoryConnection -> {
+
                         Navigator.this.connection = directoryConnection;
                         Navigator.this.searchEntry.setEditable(true);
 
                         entries.clear();
+                        Navigator.this.store.clear();
+                        GuiUtils.clearTextView(attributeViewer);
+
                         listIndexModel.setSize(entries.size());
 
                     }

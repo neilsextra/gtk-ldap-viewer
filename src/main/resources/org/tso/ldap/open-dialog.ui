@@ -31,7 +31,7 @@
             </child>
             <child>
               <object class="GtkPasswordEntry" id="password">
-                <property name="placeholder_text">&lt;password&gt;</property>
+                <property name="placeholder_text">password</property>
                  <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="margin_start">14</property>

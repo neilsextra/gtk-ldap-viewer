@@ -1,17 +1,17 @@
 package org.tso.ldap;
 
-import java.util.Map;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.cursor.SearchCursor;
-import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Attribute;
+import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.message.Control;
 import org.apache.directory.api.ldap.model.message.ResultCodeEnum;
 import org.apache.directory.api.ldap.model.message.SearchRequest;
@@ -21,7 +21,6 @@ import org.apache.directory.api.ldap.model.message.controls.PagedResults;
 import org.apache.directory.api.ldap.model.message.controls.PagedResultsImpl;
 import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.api.ldap.model.schema.AttributeType;
-
 import org.slf4j.LoggerFactory;
 
 public class DirectoryExplorer {
@@ -71,6 +70,10 @@ public class DirectoryExplorer {
 
         logger.info("Primary Search...");
 
+        if (!this.connection.getLdapConnection().isConnected()) {
+            throw new Exception("Connected Disconnected");
+        }
+
         try (EntryCursor cursor = this.connection.getLdapConnection().search(dn, "(objectclass=*)", SearchScope.OBJECT)) {
 
             for (Entry entry : cursor) {
@@ -83,7 +86,6 @@ public class DirectoryExplorer {
             cursor.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw e;
         }
 
@@ -128,7 +130,6 @@ public class DirectoryExplorer {
             cursor.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw e;
         }
 
@@ -157,6 +158,10 @@ public class DirectoryExplorer {
 
     ResultContainer next(String dn, String cursorPosition) throws Exception {
         var logger = LoggerFactory.getLogger(SchemaExplorer.class);
+
+        if (!this.connection.getLdapConnection().isConnected()) {
+            throw new Exception("Connected Disconnected");
+        }
 
         final List<String> entries = new ArrayList<>();
         final StringBuffer nextCursorPosition = new StringBuffer();
@@ -195,8 +200,7 @@ public class DirectoryExplorer {
             cursor.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+           throw e;
         }
         return new ResultContainer() {
 
@@ -220,52 +224,50 @@ public class DirectoryExplorer {
     }
 
     List<Map<String, String>> retrieve(String dn
-    ) {
-        List<Map<String, String>> attributes = new ArrayList<Map<String, String>>();
+    ) throws Exception {
+
+        if (!this.connection.getLdapConnection().isConnected()) {
+            throw new Exception("Connected Disconnected");
+        }
+
+        List<Map<String, String>> attributes = new ArrayList<>();
         var logger = LoggerFactory.getLogger(DirectoryExplorer.class);
 
         Map<String, AttributeType> schemaAttributes = connection.getSchemaExplorer().getAttributes();
+        Entry entry = this.connection.getLdapConnection().lookup(dn);
 
-        try {
-            Entry entry = this.connection.getLdapConnection().lookup(dn);
+        if (entry == null) {
+            logger.info("Entry is NULL");
 
-            if (entry == null) {
-                logger.info("Entry is NULL");
-
-                return attributes;
-            }
-
-            for (Attribute attribute : entry.getAttributes()) {
-                Map<String, String> properties = new HashMap<>();
-
-                String oid = schemaAttributes.containsKey(attribute.getId()) ? schemaAttributes.get(attribute.getId()).getOid() : " ";
-                String syntaxOid = schemaAttributes.containsKey(attribute.getId()) ? schemaAttributes.get(attribute.getId()).getSyntaxOid() : " ";
-
-                properties.put("name", attribute.getUpId());
-                properties.put("oid", oid == null ? "" : oid);
-                properties.put("syntaxOid", syntaxOid == null ? "" : syntaxOid);
-                properties.put("type", attribute.get().isHumanReadable() ? "String" : "Binary");
-
-                if (isHumanReadable(attribute.get().getString())) {
-                    properties.put("type", "String");
-                    properties.put("value", attribute.get().getString());
-
-                } else {
-                    properties.put("type", "Binary");
-                    properties.put("value", bytesToHex(attribute.get().getBytes()));
-
-                }
-
-                attributes.add(properties);
-
-            }
-
-            return attributes;
-
-        } catch (Exception e) {
-            logger.error("Search Error", e);
             return attributes;
         }
+
+        for (Attribute attribute : entry.getAttributes()) {
+            Map<String, String> properties = new HashMap<>();
+
+            String oid = schemaAttributes.containsKey(attribute.getId()) ? schemaAttributes.get(attribute.getId()).getOid() : " ";
+            String syntaxOid = schemaAttributes.containsKey(attribute.getId()) ? schemaAttributes.get(attribute.getId()).getSyntaxOid() : " ";
+
+            properties.put("name", attribute.getUpId());
+            properties.put("oid", oid == null ? "" : oid);
+            properties.put("syntaxOid", syntaxOid == null ? "" : syntaxOid);
+            properties.put("type", attribute.get().isHumanReadable() ? "String" : "Binary");
+
+            if (isHumanReadable(attribute.get().getString())) {
+                properties.put("type", "String");
+                properties.put("value", attribute.get().getString());
+
+            } else {
+                properties.put("type", "Binary");
+                properties.put("value", bytesToHex(attribute.get().getBytes()));
+
+            }
+
+            attributes.add(properties);
+
+        }
+
+        return attributes;
 
     }
 
