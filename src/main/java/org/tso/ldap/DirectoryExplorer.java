@@ -107,8 +107,7 @@ public class DirectoryExplorer {
 
             while (cursor.next()) {
                 Entry entry = cursor.getEntry();
-                System.out.println(entry.getDn().toString());
-
+ 
                 entries.add(entry.getDn().toString());
 
             }

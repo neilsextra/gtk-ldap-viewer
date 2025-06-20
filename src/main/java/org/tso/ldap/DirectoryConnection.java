@@ -48,6 +48,8 @@ public class DirectoryConnection implements Runnable {
 
             this.connection = factory.newLdapConnection();
 
+            this.connection.setTimeOut(1000000);
+
             this.schemaExplorer = new SchemaExplorer(this);
             this.directoryExplorer = new DirectoryExplorer(this);
 

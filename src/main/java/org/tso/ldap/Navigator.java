@@ -265,6 +265,18 @@ public class Navigator {
 
     }
 
+    void reset() {
+
+        entries.clear();
+        Navigator.this.store.clear();
+        GuiUtils.clearTextView(attributeViewer);
+        Navigator.this.redoSearch.setSensitive(false);
+        Navigator.this.expandEntry.setSensitive(false);
+        Navigator.this.searchDn.setText("");
+
+        listIndexModel.setSize(entries.size());
+    }
+
     void buildRows(String dn) {
 
         new RetrieveResult(mainWindow, connection).process((attributes)
@@ -296,22 +308,36 @@ public class Navigator {
     void selectRow(int selected) {
         Row row = store.get(selected);
 
-        attributeViewer.setMonospace(true);
-        TextBuffer buffer = new TextBuffer();
-        TextIter iter = new TextIter();
-        buffer.getStartIter(iter);
+        if (row != null) {
+            attributeViewer.setMonospace(true);
+            TextBuffer buffer = new TextBuffer();
+            TextIter iter = new TextIter();
+            buffer.getStartIter(iter);
 
-        String value = row.getPrimitiveType().equals("Binary") ? GuiUtils.formatHex(row.getValue()) : row.getValue();
+            String value = row.getPrimitiveType().equals("Binary") ? GuiUtils.formatHex(row.getValue()) : row.getValue();
 
-        String description = "<span weight=\"ultraheavy\" size=\"x-large\">Definition</span>" + "\n"
-                + "<b>Class:</b>" + row.getName() + "\n"
-                + "<b>OID:</b>" + row.getOid() + "\n"
-                + "<b>Syntax:</b>" + row.getSyntax() + "\n\n"
-                + "<span weight=\"ultraheavy\"  size=\"x-large\">Value</span>" + "\n"
-                + value;
+            String description = "<span weight=\"ultraheavy\" size=\"x-large\">Definition</span>" + "\n"
+                    + "<b>Class:</b>" + row.getName() + "\n"
+                    + "<b>OID:</b>" + row.getOid() + "\n"
+                    + "<b>Syntax:</b>" + row.getSyntax() + "\n\n"
+                    + "<span weight=\"ultraheavy\"  size=\"x-large\">Value</span>" + "\n"
+                    + value;
 
-        buffer.insertMarkup(iter, description, -1);
-        attributeViewer.setBuffer(buffer);
+            buffer.insertMarkup(iter, description, -1);
+            attributeViewer.setBuffer(buffer);
+
+        } else {
+            Navigator.this.connection = null;
+            Navigator.this.searchEntry.setEditable(false);
+            reset();
+
+            AlertDialog.builder()
+                    .setModal(true)
+                    .setMessage("Connection")
+                    .setDetail("Connection has been reset")
+                    .build()
+                    .show(mainWindow);
+        }
 
     }
 
@@ -558,14 +584,7 @@ public class Navigator {
                         Navigator.this.connection = directoryConnection;
                         Navigator.this.searchEntry.setEditable(true);
 
-                        entries.clear();
-                        Navigator.this.store.clear();
-                        GuiUtils.clearTextView(attributeViewer);
-                        Navigator.this.redoSearch.setSensitive(false);
-                        Navigator.this.expandEntry.setSensitive(false);
-                        Navigator.this.searchDn.setText("");
-
-                        listIndexModel.setSize(entries.size());
+                        Navigator.this.reset();
 
                     }
             );

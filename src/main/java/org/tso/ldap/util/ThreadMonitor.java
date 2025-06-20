@@ -30,6 +30,10 @@ public class ThreadMonitor {
 
             if (!thread.isAlive()) {
                 callback.onCompletion();
+                try {
+                    thread.join();
+                } catch (Exception e) {                
+                }
             } else {
                 progressBar.pulse();
             }
