@@ -252,18 +252,23 @@ public class DirectoryExplorer {
             properties.put("syntaxOid", syntaxOid == null ? "" : syntaxOid);
             properties.put("type", attribute.get().isHumanReadable() ? "String" : "Binary");
 
-            if (isHumanReadable(attribute.get().getString())) {
-                properties.put("type", "String");
-                properties.put("value", attribute.get().getString());
+            while ( iterator.hasNext() ) {
+                Map<String, String> values = new HashMap<String, String>(properties);
+                Value value = iterator.next();
 
-            } else {
-                properties.put("type", "Binary");
-                properties.put("value", bytesToHex(attribute.get().getBytes()));
+                  if (isHumanReadable(value.getString())) {
+                    values.put("type", "String");
+                    values.put("value", value.getString());
+
+                } else {
+                    values.put("type", "Binary");
+                    values.put("value", bytesToHex(value.getBytes()));
+
+                }
+
+                attributes.add(values);
 
             }
-
-            attributes.add(properties);
-
         }
 
         return attributes;
