@@ -371,7 +371,10 @@ public class Navigator {
             var inscription = (Inscription) listitem.getChild();
 
             var row = (Row) listitem.getItem();
-            inscription.setText(row.getSyntax());
+
+            if (inscription != null) {
+                inscription.setText(row.getSyntax());
+            }
 
         });
 

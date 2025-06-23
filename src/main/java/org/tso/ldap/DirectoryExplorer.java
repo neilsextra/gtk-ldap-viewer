@@ -3,6 +3,7 @@ package org.tso.ldap;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -12,6 +13,7 @@ import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.cursor.SearchCursor;
 import org.apache.directory.api.ldap.model.entry.Attribute;
 import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.entry.Value;
 import org.apache.directory.api.ldap.model.message.Control;
 import org.apache.directory.api.ldap.model.message.ResultCodeEnum;
 import org.apache.directory.api.ldap.model.message.SearchRequest;
@@ -252,7 +254,9 @@ public class DirectoryExplorer {
             properties.put("syntaxOid", syntaxOid == null ? "" : syntaxOid);
             properties.put("type", attribute.get().isHumanReadable() ? "String" : "Binary");
 
-            while ( iterator.hasNext() ) {
+            Iterator<Value> iterator = attribute.iterator();
+
+            while (iterator.hasNext() ) {
                 Map<String, String> values = new HashMap<String, String>(properties);
                 Value value = iterator.next();
 
