@@ -60,6 +60,8 @@ public class GuiUtils {
 
         for (; iHex < hex.size(); iHex++) {
 
+            output += String.format("%1$010X", iPos).toUpperCase();
+
             iPos += 1;
 
             hexValues += " " + hex.get(iHex) + " | ";
@@ -75,11 +77,14 @@ public class GuiUtils {
             }
 
             if (iHex % 16 != 0) {
+                output += String.format("%1$010X", iPos).toUpperCase();
+
                 output += hexValues;
 
                 for (var iCount = 0; iPos % 16 != 0; iPos++, iCount++) {
 
-                    output += "  | ";
+                    output += iCount < 16 ? "   " : "  | ";
+
                 }
 
                 output += charValues;
