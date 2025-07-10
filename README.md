@@ -14,7 +14,7 @@ GTK Sample LDAP Viewer
 `ldap://<user-dn>@<hostname>:389`
 
 Example
-`ldap://cn=read-only-admin,dc=example,dc=com:@ldap.forumsys.com:389`
+`ldap://cn=read-only-admin,dc=example,dc=com@ldap.forumsys.com:389`
 
 ## Note:
 Password must be supplied separately within the password field.
