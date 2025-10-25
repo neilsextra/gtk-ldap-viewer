@@ -102,6 +102,7 @@ public class DirectoryExplorer {
         searchRequest.setTimeLimit(10000);
         searchRequest.setFilter("(objectclass=*)");
         searchRequest.setScope(SearchScope.ONELEVEL);
+        searchRequest.addAttributes("1.1");
         searchRequest.addControl(pagedControl);
 
         try (SearchCursor cursor = this.connection.getLdapConnection().search(searchRequest)) {
@@ -175,6 +176,7 @@ public class DirectoryExplorer {
         searchRequest.setBase(new Dn(dn));
         searchRequest.setFilter("(objectclass=*)");
         searchRequest.setScope(SearchScope.SUBTREE);
+        searchRequest.addAttributes("1.1");
         searchRequest.addControl(pageControl);
 
         try (SearchCursor cursor = this.connection.getLdapConnection().search(searchRequest)) {
