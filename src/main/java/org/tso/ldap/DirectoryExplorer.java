@@ -235,7 +235,7 @@ public class DirectoryExplorer {
         var logger = LoggerFactory.getLogger(DirectoryExplorer.class);
 
         Map<String, AttributeType> schemaAttributes = connection.getSchemaExplorer().getAttributes();
-        Entry entry = this.connection.getLdapConnection().lookup(dn);
+        Entry entry = this.connection.getLdapConnection().lookup(dn, "*", "+");
 
         if (entry == null) {
             logger.info("Entry is NULL");
